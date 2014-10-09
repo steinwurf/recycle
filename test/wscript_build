@@ -1,0 +1,7 @@
+# encoding: utf-8
+
+bld.program(
+    features='cxx test',
+    source=['recycle_tests.cpp'] + bld.path.ant_glob('src/*.cpp'),
+    target='recycle_tests',
+    use=['recycle_includes', 'gtest'])
