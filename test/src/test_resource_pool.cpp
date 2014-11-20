@@ -3,11 +3,16 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <cstdint>
-#include <thread>
-#include <mutex>
-#include <gtest/gtest.h>
 #include <recycle/resource_pool.hpp>
+
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <type_traits>
+
+#include <gtest/gtest.h>
 
 // Put tests classes in an anonymous namespace to avoid violations of
 // ODF (one-definition-rule) in other translation units

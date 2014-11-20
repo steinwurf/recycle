@@ -5,9 +5,14 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
 #include <functional>
-#include <memory>
 #include <list>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 #include "no_locking_policy.hpp"
 
