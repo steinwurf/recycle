@@ -6,6 +6,10 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+1.0.1
+-----
 * Patch: Added test for no_locking_policy.hpp
 * Patch: Fixed includes
 
