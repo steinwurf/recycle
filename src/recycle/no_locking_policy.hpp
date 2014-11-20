@@ -5,10 +5,6 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
-#include <list>
-
 namespace recycle
 {
     /// Defines the default non thread-safe locking policy for the
