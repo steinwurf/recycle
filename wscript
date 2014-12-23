@@ -64,6 +64,5 @@ def build(bld):
     # Export own includes
     bld(name='recycle_includes',
         includes='./src',
-        export_defines=[
-            'STEINWURF_{}_VERSION="{}"'.format(APPNAME.upper(), VERSION)],
+        export_defines=['STEINWURF_RECYCLE_VERSION="{}"'.format(VERSION)],
         export_includes='./src')
