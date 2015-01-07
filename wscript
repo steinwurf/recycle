@@ -61,8 +61,10 @@ def build(bld):
         # in a recurse call
         bld.recurse('test')
 
-    # Export own includes
     bld(name='recycle_includes',
         includes='./src',
-        export_defines=['STEINWURF_RECYCLE_VERSION="{}"'.format(VERSION)],
         export_includes='./src')
+
+    bld.env.append_unique(
+        'DEFINES_STEINWURF_VERSION',
+        'STEINWURF_RECYCLE_VERSION="{}"'.format(VERSION))
