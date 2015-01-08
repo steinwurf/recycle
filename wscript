@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 APPNAME = 'recycle'
-VERSION = '1.1.0'
+VERSION = '1.1.1'
 
 
 def recurse_helper(ctx, name):
