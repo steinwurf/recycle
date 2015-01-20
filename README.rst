@@ -1,14 +1,13 @@
-=======
 recycle
 =======
 
-Implements a simple resource pool for resources in C++.
+recycle is an implementation of a simple c++ resource pool.
 
 .. contents:: Table of Contents:
    :local:
 
 Usage
-=====
+-----
 
 The ``recycle::resource_pool`` is useful when managing expensive to
 construct objects. The life-time of the managed objects is controlled
@@ -17,7 +16,7 @@ objects in the pool when the last remaining ``std::shared_ptr`` owning
 the object is destroyed.
 
 Header-only
------------
+...........
 
 The library itself is header-only so essentially to use it you just
 have to clone the repository and setup the right include paths in the
@@ -26,12 +25,12 @@ project where you would like to use it.
 The library uses c++11 features such as variadic templates, so you
 need a relatively recent compiler to use it.
 
-Allocating objects
+Allocating Objects
 ------------------
 
 There are two ways we can control how objects are allocated:
 
-Using the default allocator
+Using the Default Allocator
 ...........................
 
 Example:
@@ -39,6 +38,7 @@ Example:
 ::
 
    #include <recycle/resource_pool.hpp>
+   #include <cassert>
 
    struct heavy_object
    {
@@ -64,7 +64,7 @@ case ``heavy_object`` is default constructible (i.e. has a constructor
 which takes no arguments). Internally the resource pool uses
 ``std::make_shared`` to allocate the object.
 
-Using a custom allocator
+Using a Custom Allocator
 ........................
 
 Example:
@@ -72,6 +72,7 @@ Example:
 ::
 
    #include <recycle/resource_pool.hpp>
+   #include <memory>
 
    struct heavy_object
    {
@@ -92,7 +93,7 @@ Example:
 In this case we provide a custom allocator function which takes no
 arguments and returns a ``std::shared_ptr``.
 
-Recycling objects
+Recycling Objects
 -----------------
 
 When recycling objects it is sometimes necessary to ensure that
@@ -109,6 +110,7 @@ Example:
 ::
 
    #include <recycle/resource_pool.hpp>
+   #include <memory>
 
    struct heavy_object
    {
@@ -137,7 +139,7 @@ Example:
        // with o1 as argument.
    }
 
-Thread safety
+Thread Safety
 -------------
 
 Since the free lunch is over we want to make sure that the resource
@@ -151,6 +153,8 @@ Example:
 ::
 
    #include <recycle/resource_pool.hpp>
+   #include <mutex>
+   #include <thread>
 
    struct heavy_object
    {
@@ -165,24 +169,24 @@ Example:
 
    recycle::resource_pool<heavy_object, lock_policy> pool;
 
-    // Lambda the threads will execute captures a reference to the pool
-    // so they will all operate on the same pool concurrently
-    auto run = [&pool]()
-        {
-            auto a1 = pool.allocate();
-        }
+   // Lambda the threads will execute captures a reference to the pool
+   // so they will all operate on the same pool concurrently
+   auto run = [&pool]()
+   {
+       auto a1 = pool.allocate();
+   };
 
-    const uint32_t number_threads = 8;
-    std::thread t[number_threads];
+   const uint32_t number_threads = 8;
+   std::thread t[number_threads];
 
-    //Launch a group of threads
-    for (uint32_t i = 0; i < number_threads; ++i)
-    {
-        t[i] = std::thread(run);
-    }
+   //Launch a group of threads
+   for (uint32_t i = 0; i < number_threads; ++i)
+   {
+       t[i] = std::thread(run);
+   }
 
-    //Join the threads with the main thread
-    for (uint32_t i = 0; i < number_threads; ++i)
-    {
-        t[i].join();
-    }
+   //Join the threads with the main thread
+   for (uint32_t i = 0; i < number_threads; ++i)
+   {
+       t[i].join();
+   }

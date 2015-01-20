@@ -22,7 +22,7 @@ def importCode(code, name, add_to_sys_modules=0):
     object containing the code (a string, a file handle or an
     actual compiled code object, same types as accepted by an
     exec statement). The name is the name to give to the module,
-    and the final argument says wheter to add it to sys.modules
+    and the final argument says whether to add it to sys.modules
     or not. If it is added, a subsequent import statement using
     name will return this module. If it is not added to sys.modules
     import will try to load it in the normal fashion.
