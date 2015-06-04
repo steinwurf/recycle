@@ -6,7 +6,8 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Minor: Added buildbot.py for coverage reports.
+* Patch: Fixed comparison warnings in unit tests.
 
 1.1.1
 -----
