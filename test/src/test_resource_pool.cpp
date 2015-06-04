@@ -321,7 +321,7 @@ TEST(TestResourcePool, MoveConstructor)
     recycle::resource_pool<dummy_one> new_pool(std::move(pool));
 
     o2.reset();
-    EXPECT_EQ(new_pool.unused_resources(), 2);
+    EXPECT_EQ(new_pool.unused_resources(), 2U);
 }
 
 /// Test move assignment
@@ -339,7 +339,7 @@ TEST(TestResourcePool, MoveAssignment)
 
     o2.reset();
 
-    EXPECT_EQ(new_pool.unused_resources(), 2);
+    EXPECT_EQ(new_pool.unused_resources(), 2U);
 }
 
 /// Test that copy assignment works when we copy from an object with

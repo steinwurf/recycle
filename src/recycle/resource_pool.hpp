@@ -153,7 +153,6 @@ namespace recycle
         /// into the pool once they go out of scope.
         struct impl : public std::enable_shared_from_this<impl>
         {
-
             /// @copydoc resource_pool::resource_pool(allocate_function)
             impl(allocate_function allocate) :
                 m_allocate(std::move(allocate))
@@ -294,7 +293,6 @@ namespace recycle
             /// threads releases a resource into the free list while
             /// another tries to read its size.
             mutable mutex_type m_mutex;
-
         };
 
         /// The custom deleter object used by the std::shared_ptr<T>
@@ -305,9 +303,9 @@ namespace recycle
         {
             /// @param pool. A weak_ptr to the pool
             deleter(const std::weak_ptr<impl>& pool,
-                    const value_ptr& resource)
-                : m_pool(pool),
-                  m_resource(resource)
+                    const value_ptr& resource) :
+                m_pool(pool),
+                m_resource(resource)
             {
                 assert(!m_pool.expired());
                 assert(m_resource);
