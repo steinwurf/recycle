@@ -15,12 +15,12 @@ def run_cmd(args):
 
 
 def configure(properties):
-    command = [sys.executable, 'waf', 'configure']
+    command = [sys.executable, 'waf']
 
     if properties.get('build_distclean'):
         command += ['distclean']
 
-    command += ['--git-protocol=git@']
+    command += ['configure', '--git-protocol=git@']
 
     if 'waf_bundle_path' in properties:
         command += ['--bundle-path=' + properties['waf_bundle_path']]
