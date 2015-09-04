@@ -11,6 +11,7 @@ project_name = 'recycle'
 
 def run_cmd(args):
     print("Running: {}".format(args))
+    sys.stdout.flush()
     subprocess.check_call(args)
 
 
