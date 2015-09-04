@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 # encoding: utf-8
 
 import os
@@ -7,6 +7,7 @@ import json
 import subprocess
 
 project_name = 'recycle'
+
 
 def run_cmd(args):
     print("Running: {}".format(args))
@@ -71,4 +72,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()    
+    main()
