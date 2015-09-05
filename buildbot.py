@@ -43,7 +43,7 @@ def configure(properties):
             properties['dependency_checkout'])]
 
     options = "--options=cxx_mkspec={}".format(properties['cxx_mkspec'])
-    options += add_tool_options(properties)
+    options += get_tool_options(properties)
 
     command += [options]
     run_cmd(command)
@@ -65,7 +65,7 @@ def run_tests(options):
     if run_cmd:
         options += ",run_cmd={}".format(run_cmd)
 
-    options += add_tool_options(properties)
+    options += get_tool_options(properties)
 
     command += [options]
     run_cmd(command)
