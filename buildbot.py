@@ -51,12 +51,12 @@ def configure(properties):
     run_cmd(command)
 
 
-def build(options):
+def build(properties):
     command = [sys.executable, 'waf', 'build', '-v']
     run_cmd(command)
 
 
-def run_tests(options):
+def run_tests(properties):
     command = [sys.executable, 'waf', '-v']
     options = '--options=run_tests,run_always'
     run_cmd = None
