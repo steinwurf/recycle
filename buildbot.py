@@ -86,6 +86,7 @@ def main():
 
     cmd = argv[1]
     properties = json.loads(argv[2])
+
     if cmd == 'configure':
         configure(properties)
     if cmd == 'build':
