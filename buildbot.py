@@ -14,6 +14,7 @@ def run_cmd(args):
     sys.stdout.flush()
     subprocess.check_call(args)
 
+
 def get_tool_options(properties):
     options = ""
     if 'tool_options' in properties:
@@ -25,6 +26,7 @@ def get_tool_options(properties):
                 options += ',{0}={1}'.format(key, value)
 
     return options
+
 
 def configure(properties):
     command = [sys.executable, 'waf']
