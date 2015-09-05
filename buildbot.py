@@ -9,7 +9,7 @@ import subprocess
 project_name = 'recycle'
 
 
-def run_cmd(args):
+def run_command(args):
     print("Running: {}".format(args))
     sys.stdout.flush()
     subprocess.check_call(args)
@@ -48,12 +48,12 @@ def configure(properties):
     options += get_tool_options(properties)
 
     command += [options]
-    run_cmd(command)
+    run_command(command)
 
 
 def build(properties):
     command = [sys.executable, 'waf', 'build', '-v']
-    run_cmd(command)
+    run_command(command)
 
 
 def run_tests(properties):
@@ -70,7 +70,7 @@ def run_tests(properties):
     options += get_tool_options(properties)
 
     command += [options]
-    run_cmd(command)
+    run_command(command)
 
 
 def coverage_settings(options):
