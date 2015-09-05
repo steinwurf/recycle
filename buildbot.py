@@ -14,6 +14,17 @@ def run_cmd(args):
     sys.stdout.flush()
     subprocess.check_call(args)
 
+def get_tool_options(properties):
+    options = ""
+    if 'tool_options' in properties:
+        # Make sure that the values are correctly comma separated
+        for key, value in properties['tool_options'].iteritems():
+            if value is None:
+                options += ',{0}'.format(key)
+            else:
+                options += ',{0}={1}'.format(key, value)
+
+    return options
 
 def configure(properties):
     command = [sys.executable, 'waf']
@@ -32,26 +43,32 @@ def configure(properties):
             properties['dependency_checkout'])]
 
     options = "--options=cxx_mkspec={}".format(properties['cxx_mkspec'])
-
-    if 'tool_options' in properties:
-        # Make sure that the values are correctly comma separated
-        for key, value in properties['tool_options'].iteritems():
-            if value is None:
-                options += ',{0}'.format(key)
-            else:
-                options += ',{0}={1}'.format(key, value)
+    options += add_tool_options(properties)
 
     command += [options]
-
     run_cmd(command)
 
 
 def build(options):
-    pass
+    command = [sys.executable, 'waf', 'build', '-v']
+    run_cmd(command)
 
 
 def run_tests(options):
-    pass
+    command = [sys.executable, 'waf', '-v']
+    options = '--options=run_tests,run_always'
+    run_cmd = None
+
+    if properties.get('valgrind_run'):
+        run_cmd = 'valgrind --error-exitcode=1 %s'
+
+    if run_cmd:
+        options += ",run_cmd={}".format(run_cmd)
+
+    options += add_tool_options(properties)
+
+    command += [options]
+    run_cmd(command)
 
 
 def coverage_settings(options):
@@ -62,12 +79,17 @@ def main():
     argv = sys.argv
 
     if len(argv) != 3:
-        print("Usage: {} <command> <options>".format(argv[0]))
+        print("Usage: {} <command> <properties>".format(argv[0]))
         sys.exit(0)
 
     cmd = argv[1]
+    properties = json.loads(argv[2])
     if cmd == 'configure':
-        configure(json.loads(argv[2]))
+        configure(properties)
+    if cmd == 'build':
+        build(properties)
+    if cmd == 'run_tests':
+        run_tests(properties)
     else:
         print("Unknown command: {}".format(cmd))
 
