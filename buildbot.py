@@ -89,9 +89,9 @@ def main():
 
     if cmd == 'configure':
         configure(properties)
-    if cmd == 'build':
+    elif cmd == 'build':
         build(properties)
-    if cmd == 'run_tests':
+    elif cmd == 'run_tests':
         run_tests(properties)
     else:
         print("Unknown command: {}".format(cmd))
