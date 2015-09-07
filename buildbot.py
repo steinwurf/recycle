@@ -73,6 +73,21 @@ def run_tests(properties):
     run_command(command)
 
 
+def install(properties):
+    command = [sys.executable, 'waf', '-v', 'install']
+
+    options = []
+    if 'install_path' in properties:
+        options += ['install_path={0}'.format(properties['install_path'])]
+    if properties.get('install_relative'):
+        options += ['install_relative']
+
+    if len(options) > 0:
+        command += ['--options={}'.format(",".join(options))]
+
+    run_command(command)
+
+
 def coverage_settings(options):
     options['required_line_coverage'] = 100.0
 
@@ -93,6 +108,8 @@ def main():
         build(properties)
     elif cmd == 'run_tests':
         run_tests(properties)
+    elif cmd == 'install':
+        install(properties)
     else:
         print("Unknown command: {}".format(cmd))
 
