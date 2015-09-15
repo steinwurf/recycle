@@ -322,6 +322,29 @@ namespace recycle
                 {
                     pool->recycle(m_resource);
                 }
+
+                // This reset() is needed because otherwise a circular
+                // dependency can arrise where in special situations.
+                //
+                // One example of such a situation is when the value_type
+                // derives from std::enable_shared_from_this in that case,
+                // the following will happen:
+                //
+                // The std::enable_shared_from_this implementation works by
+                // storing a std::weak_ptr to itself. This std::weak_ptr
+                // internally points to an "counted" object keeping track
+                // of the reference count managing the raw pointer release
+                // policy (e.g. storing the custom deletors etc.) for all
+                // the shared_ptr's. The "counted" object is both kept
+                // alive by all std::shared_ptr and std::weak_ptr objects.
+                //
+                // In this specific case of std::enable_shared_from_this,
+                // the custom deletor is not destroyed because the internal
+                // std::weak_ptr still points to the "counted" object and
+                // inside the custom deletor we are keeping the managed
+                // object alive because we have a std::shared_ptr to it.
+                //
+                m_resource.reset();
             }
 
             // Poiner to the pool needed for recycling
