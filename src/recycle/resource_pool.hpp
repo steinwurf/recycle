@@ -324,7 +324,7 @@ namespace recycle
                 }
 
                 // This reset() is needed because otherwise a circular
-                // dependency can arrise where in special situations.
+                // dependency can arrise here in special situations.
                 //
                 // One example of such a situation is when the value_type
                 // derives from std::enable_shared_from_this in that case,
@@ -344,6 +344,41 @@ namespace recycle
                 // inside the custom deletor we are keeping the managed
                 // object alive because we have a std::shared_ptr to it.
                 //
+                // The following diagram show the circular dependency where
+                // the arrows indicate what is keeping what alive:
+                //
+                //  +--------------+                      +------------+
+                //  |custom deleter+----------------+     |real deletor|
+                //  +------+-------+                |     +------+-----+
+                //         ^                        |            ^
+                //         |                        |            |
+                //         |                        |            |
+                //   +-----+------+                 |     +------+-----+
+                //   |shared_count|                 |     |shared_count|
+                //   +--+----+----+                 |     +------+-----+
+                //      ^    ^                      |            ^
+                //      |    |                      |            |
+                //      |    |                      |            |
+                //      |    |                      v            |
+                //      |    |  +----------+      +----------+   |
+                //      |    +--+shared_ptr|      |shared_ptr+---+
+                //      |       +----------+      +----+-----+
+                //      |                              |
+                //      |                              |
+                // +----+---+              +------+    |
+                // |weak_ptr+<-------------+object|<---+
+                // +--------+              +------+
+                //
+                // The shared_ptr on the right is the one managed by the
+                // resource pool, it is the one actually deleting the
+                // object when it goes out of scope. The shared_ptr on the
+                // left is the one returne to the user with the custom
+                // deletor that will return the object into the resource
+                // pool when it goes out of scope.
+                //
+                // By calling reset on the shared_ptr in the custom deletor
+                // we break the cyclic dependency.
+
                 m_resource.reset();
             }
 
