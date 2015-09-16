@@ -6,6 +6,12 @@ every change, see the Git log.
 
 Latest
 ------
+* tbd
+
+1.2.0
+-----
+* Patch: Fix a memory leak caused by a circular dependency when using objects
+  inheriting from ``std::enable_shared_from_this``.
 * Minor: Added buildbot.py for coverage reports.
 * Patch: Fixed comparison warnings in unit tests.
 
