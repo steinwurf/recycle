@@ -473,10 +473,8 @@ TEST(test_resource_pool, enable_shared_from_this)
 
         auto o1 = pool.allocate();
         EXPECT_EQ(1U, o1.use_count());
-        auto o2 = pool.allocate();
-        EXPECT_EQ(1U, o2.use_count());
 
-        EXPECT_EQ(dummy_three::m_count, 2);
+        EXPECT_EQ(dummy_three::m_count, 1);
     }
 
     EXPECT_EQ(dummy_three::m_count, 0);
