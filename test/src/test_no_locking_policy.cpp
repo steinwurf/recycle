@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(TestNoLockingPolicy, Empty)
+TEST(test_no_locking_policy, empty)
 {
     recycle::no_locking_policy policy;
     (void) policy;

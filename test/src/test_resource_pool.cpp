@@ -26,10 +26,6 @@ namespace
             ++m_count;
         }
 
-        void recycle()
-        { }
-
-
         ~dummy_one()
         {
             --m_count;
@@ -69,6 +65,27 @@ namespace
     {
         return std::make_shared<dummy_two>(v);
     }
+
+    // enable_shared_from_this dummy object
+    struct dummy_three : std::enable_shared_from_this<dummy_three>
+    {
+
+        dummy_three()
+        {
+            ++m_count;
+        }
+
+        ~dummy_three()
+        {
+            --m_count;
+        }
+
+        // Counter which will check how many object have been allocate
+        // and deallocated
+        static int32_t m_count;
+    };
+
+    int32_t dummy_three::m_count = 0;
 }
 
 /// Test that our resource pool is a regular type. We are not
@@ -89,14 +106,14 @@ namespace
     { };
 }
 
-TEST(TestResourcePool, RegularType)
+TEST(test_resource_pool, regular_type)
 {
     EXPECT_TRUE(is_regular<recycle::resource_pool<dummy_one>>::value);
     EXPECT_FALSE(is_regular<recycle::resource_pool<dummy_two>>::value);
 }
 
 /// Test the basic API construct and free some objects
-TEST(TestResourcePool, Api)
+TEST(test_resource_pool, api)
 {
     {
         recycle::resource_pool<dummy_one> pool;
@@ -135,7 +152,7 @@ TEST(TestResourcePool, Api)
 }
 
 /// Test the pool works with std::bind
-TEST(TestResourcePool, bind)
+TEST(test_resource_pool, bind)
 {
     {
         recycle::resource_pool<dummy_one> pool_one(
@@ -158,7 +175,7 @@ TEST(TestResourcePool, bind)
 
 /// Test that the pool works for non default constructable objects, if
 /// we provide the allocator
-TEST(TestResourcePool, NonDefaultConstructable)
+TEST(test_resource_pool, non_default_constructable)
 {
     {
         recycle::resource_pool<dummy_two> pool(std::bind(make_dummy_two, 4U));
@@ -190,7 +207,7 @@ TEST(TestResourcePool, NonDefaultConstructable)
 
 /// Test that the pool works for non constructable objects, even if
 /// we do not provide the allocator
-TEST(TestResourcePool, DefaultConstructable)
+TEST(test_resource_pool, default_constructable)
 {
     {
         recycle::resource_pool<dummy_one> pool;
@@ -206,7 +223,7 @@ TEST(TestResourcePool, DefaultConstructable)
 
 /// Test that everything works even if the pool dies before the
 /// objects allocated
-TEST(TestResourcePool, PoolDieBeforeObject)
+TEST(test_resource_pool, pool_die_before_object)
 {
     {
         std::shared_ptr<dummy_one> d1;
@@ -231,7 +248,7 @@ TEST(TestResourcePool, PoolDieBeforeObject)
 }
 
 /// Test that the recycle functionality works
-TEST(TestResourcePool, Recycle)
+TEST(test_resource_pool, recycle)
 {
     uint32_t recycled = 0;
 
@@ -263,7 +280,7 @@ TEST(TestResourcePool, Recycle)
 ///     T a = c; T b = c; a = d; assert(b == c);
 ///     T a = c; T b = c; zap(a); assert(b == c && a != b);
 ///
-TEST(TestResourcePool, CopyConstructor)
+TEST(test_resource_pool, copy_constructor)
 {
     recycle::resource_pool<dummy_one> pool;
 
@@ -291,7 +308,7 @@ TEST(TestResourcePool, CopyConstructor)
 }
 
 /// Test copy assignment works
-TEST(TestResourcePool, CopyAssignment)
+TEST(test_resource_pool, copy_assignment)
 {
     recycle::resource_pool<dummy_one> pool;
 
@@ -309,7 +326,7 @@ TEST(TestResourcePool, CopyAssignment)
 }
 
 /// Test move constructor
-TEST(TestResourcePool, MoveConstructor)
+TEST(test_resource_pool, move_constructor)
 {
     recycle::resource_pool<dummy_one> pool;
 
@@ -325,7 +342,7 @@ TEST(TestResourcePool, MoveConstructor)
 }
 
 /// Test move assignment
-TEST(TestResourcePool, MoveAssignment)
+TEST(test_resource_pool, move_assignment)
 {
     recycle::resource_pool<dummy_one> pool;
 
@@ -344,7 +361,7 @@ TEST(TestResourcePool, MoveAssignment)
 
 /// Test that copy assignment works when we copy from an object with
 /// recycle functionality
-TEST(TestResourcePool, CopyRecycle)
+TEST(test_resource_pool, copy_recycle)
 {
     uint32_t recycled = 0;
 
@@ -387,7 +404,7 @@ namespace
     };
 }
 
-TEST(TestResourcePool, Thread)
+TEST(test_resource_pool, thread)
 {
     uint32_t recycled = 0;
 
@@ -445,4 +462,20 @@ TEST(TestResourcePool, Thread)
     {
         t[i].join();
     }
+}
+
+/// Test that the pool works for enable_shared_from_this objects, even if
+/// we do not provide the allocator
+TEST(test_resource_pool, enable_shared_from_this)
+{
+    {
+        recycle::resource_pool<dummy_three> pool;
+
+        auto o1 = pool.allocate();
+        EXPECT_EQ(1U, o1.use_count());
+
+        EXPECT_EQ(dummy_three::m_count, 1);
+    }
+
+    EXPECT_EQ(dummy_three::m_count, 0);
 }
