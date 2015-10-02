@@ -8,6 +8,11 @@ Latest
 ------
 * tbd
 
+2.0.0
+-----
+* Major: Upgrade to waf-tools 3
+* Minor: Upgrade to gtest 3
+
 1.2.0
 -----
 * Patch: Fix a memory leak caused by a circular dependency when using objects
