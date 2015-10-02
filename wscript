@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 APPNAME = 'recycle'
-VERSION = '1.1.1'
+VERSION = '1.2.0'
 
 import waflib.extras.wurf_options
 

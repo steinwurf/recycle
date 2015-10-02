@@ -153,7 +153,6 @@ namespace recycle
         /// into the pool once they go out of scope.
         struct impl : public std::enable_shared_from_this<impl>
         {
-
             /// @copydoc resource_pool::resource_pool(allocate_function)
             impl(allocate_function allocate) :
                 m_allocate(std::move(allocate))
@@ -294,7 +293,6 @@ namespace recycle
             /// threads releases a resource into the free list while
             /// another tries to read its size.
             mutable mutex_type m_mutex;
-
         };
 
         /// The custom deleter object used by the std::shared_ptr<T>
@@ -305,9 +303,9 @@ namespace recycle
         {
             /// @param pool. A weak_ptr to the pool
             deleter(const std::weak_ptr<impl>& pool,
-                    const value_ptr& resource)
-                : m_pool(pool),
-                  m_resource(resource)
+                    const value_ptr& resource) :
+                m_pool(pool),
+                m_resource(resource)
             {
                 assert(!m_pool.expired());
                 assert(m_resource);
@@ -324,9 +322,66 @@ namespace recycle
                 {
                     pool->recycle(m_resource);
                 }
+
+                // This reset() is needed because otherwise a circular
+                // dependency can arise here in special situations.
+                //
+                // One example of such a situation is when the value_type
+                // derives from std::enable_shared_from_this in that case,
+                // the following will happen:
+                //
+                // The std::enable_shared_from_this implementation works by
+                // storing a std::weak_ptr to itself. This std::weak_ptr
+                // internally points to an "counted" object keeping track
+                // of the reference count managing the raw pointer's release
+                // policy (e.g. storing the custom deleter etc.) for all
+                // the shared_ptr's. The "counted" object is both kept
+                // alive by all std::shared_ptr and std::weak_ptr objects.
+                //
+                // In this specific case of std::enable_shared_from_this,
+                // the custom deleter is not destroyed because the internal
+                // std::weak_ptr still points to the "counted" object and
+                // inside the custom deleter we are keeping the managed
+                // object alive because we have a std::shared_ptr to it.
+                //
+                // The following diagram show the circular dependency where
+                // the arrows indicate what is keeping what alive:
+                //
+                //  +----------------+                   +--------------+
+                //  | custom deleter +--------------+    | real deleter |
+                //  +----------------+              |    +--------------+
+                //         ^                        |            ^
+                //         |                        |            |
+                //         |                        |            |
+                //   +-----+--------+               |    +-------+------+
+                //   | shared_count |               |    | shared_count |
+                //   +--------------+               |    +--------------+
+                //      ^    ^                      |            ^
+                //      |    |                      |            |
+                //      |    |                      |            |
+                //      |    |                      v            |
+                //      |    |  +------------+    +------------+ |
+                //      |    +--+ shared_ptr |    | shared_ptr +-+
+                //      |       +------------+    +----+-------+
+                //      |                              |
+                //      |                              |
+                // +----+-----+            +--------+  |
+                // | weak_ptr |<-----------+ object |<-+
+                // +----------+            +--------+
+                //
+                // The std::shared_ptr on the right is the one managed by the
+                // resource pool, it is the one actually deleting the
+                // object when it goes out of scope. The shared_ptr on the
+                // left is the one which contains the custom
+                // deleter that will return the object into the resource
+                // pool when it goes out of scope.
+                //
+                // By calling reset on the shared_ptr in the custom deleter
+                // we break the cyclic dependency.
+                m_resource.reset();
             }
 
-            // Poiner to the pool needed for recycling
+            // Pointer to the pool needed for recycling
             std::weak_ptr<impl> m_pool;
 
             // The resource object

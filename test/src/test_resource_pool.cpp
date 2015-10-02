@@ -18,7 +18,6 @@
 // ODF (one-definition-rule) in other translation units
 namespace
 {
-
     // Default constructible dummy object
     struct dummy_one
     {
@@ -26,10 +25,6 @@ namespace
         {
             ++m_count;
         }
-
-        void recycle()
-        { }
-
 
         ~dummy_one()
         {
@@ -70,6 +65,27 @@ namespace
     {
         return std::make_shared<dummy_two>(v);
     }
+
+    // enable_shared_from_this dummy object
+    struct dummy_three : std::enable_shared_from_this<dummy_three>
+    {
+
+        dummy_three()
+        {
+            ++m_count;
+        }
+
+        ~dummy_three()
+        {
+            --m_count;
+        }
+
+        // Counter which will check how many object have been allocate
+        // and deallocated
+        static int32_t m_count;
+    };
+
+    int32_t dummy_three::m_count = 0;
 }
 
 /// Test that our resource pool is a regular type. We are not
@@ -90,14 +106,14 @@ namespace
     { };
 }
 
-TEST(TestResourcePool, RegularType)
+TEST(test_resource_pool, regular_type)
 {
     EXPECT_TRUE(is_regular<recycle::resource_pool<dummy_one>>::value);
     EXPECT_FALSE(is_regular<recycle::resource_pool<dummy_two>>::value);
 }
 
 /// Test the basic API construct and free some objects
-TEST(TestResourcePool, Api)
+TEST(test_resource_pool, api)
 {
     {
         recycle::resource_pool<dummy_one> pool;
@@ -136,7 +152,7 @@ TEST(TestResourcePool, Api)
 }
 
 /// Test the pool works with std::bind
-TEST(TestResourcePool, bind)
+TEST(test_resource_pool, bind)
 {
     {
         recycle::resource_pool<dummy_one> pool_one(
@@ -148,18 +164,18 @@ TEST(TestResourcePool, bind)
         auto o1 = pool_one.allocate();
         auto o2 = pool_two.allocate();
 
-        EXPECT_EQ(dummy_one::m_count, 1U);
-        EXPECT_EQ(dummy_two::m_count, 1U);
+        EXPECT_EQ(dummy_one::m_count, 1);
+        EXPECT_EQ(dummy_two::m_count, 1);
     }
 
-    EXPECT_EQ(dummy_one::m_count, 0U);
-    EXPECT_EQ(dummy_two::m_count, 0U);
+    EXPECT_EQ(dummy_one::m_count, 0);
+    EXPECT_EQ(dummy_two::m_count, 0);
 }
 
 
 /// Test that the pool works for non default constructable objects, if
 /// we provide the allocator
-TEST(TestResourcePool, NonDefaultConstructable)
+TEST(test_resource_pool, non_default_constructable)
 {
     {
         recycle::resource_pool<dummy_two> pool(std::bind(make_dummy_two, 4U));
@@ -167,10 +183,10 @@ TEST(TestResourcePool, NonDefaultConstructable)
         auto o1 = pool.allocate();
         auto o2 = pool.allocate();
 
-        EXPECT_EQ(dummy_two::m_count, 2U);
+        EXPECT_EQ(dummy_two::m_count, 2);
     }
 
-    EXPECT_EQ(dummy_two::m_count, 0U);
+    EXPECT_EQ(dummy_two::m_count, 0);
 
     {
         auto make = []()->std::shared_ptr<dummy_two>
@@ -183,15 +199,15 @@ TEST(TestResourcePool, NonDefaultConstructable)
         auto o1 = pool.allocate();
         auto o2 = pool.allocate();
 
-        EXPECT_EQ(dummy_two::m_count, 2U);
+        EXPECT_EQ(dummy_two::m_count, 2);
     }
 
-    EXPECT_EQ(dummy_two::m_count, 0U);
+    EXPECT_EQ(dummy_two::m_count, 0);
 }
 
 /// Test that the pool works for non constructable objects, even if
 /// we do not provide the allocator
-TEST(TestResourcePool, DefaultConstructable)
+TEST(test_resource_pool, default_constructable)
 {
     {
         recycle::resource_pool<dummy_one> pool;
@@ -199,15 +215,15 @@ TEST(TestResourcePool, DefaultConstructable)
         auto o1 = pool.allocate();
         auto o2 = pool.allocate();
 
-        EXPECT_EQ(dummy_one::m_count, 2U);
+        EXPECT_EQ(dummy_one::m_count, 2);
     }
 
-    EXPECT_EQ(dummy_one::m_count, 0U);
+    EXPECT_EQ(dummy_one::m_count, 0);
 }
 
 /// Test that everything works even if the pool dies before the
 /// objects allocated
-TEST(TestResourcePool, PoolDieBeforeObject)
+TEST(test_resource_pool, pool_die_before_object)
 {
     {
         std::shared_ptr<dummy_one> d1;
@@ -222,18 +238,17 @@ TEST(TestResourcePool, PoolDieBeforeObject)
             d3 = pool.allocate();
 
             // EXPECT_EQ(pool.total_resources(), 3U);
-            EXPECT_EQ(dummy_one::m_count, 3U);
+            EXPECT_EQ(dummy_one::m_count, 3);
         }
 
-        EXPECT_EQ(dummy_one::m_count, 3U);
-
+        EXPECT_EQ(dummy_one::m_count, 3);
     }
 
-    EXPECT_EQ(dummy_one::m_count, 0U);
+    EXPECT_EQ(dummy_one::m_count, 0);
 }
 
 /// Test that the recycle functionality works
-TEST(TestResourcePool, Recycle)
+TEST(test_resource_pool, recycle)
 {
     uint32_t recycled = 0;
 
@@ -265,7 +280,7 @@ TEST(TestResourcePool, Recycle)
 ///     T a = c; T b = c; a = d; assert(b == c);
 ///     T a = c; T b = c; zap(a); assert(b == c && a != b);
 ///
-TEST(TestResourcePool, CopyConstructor)
+TEST(test_resource_pool, copy_constructor)
 {
     recycle::resource_pool<dummy_one> pool;
 
@@ -284,16 +299,16 @@ TEST(TestResourcePool, CopyConstructor)
     EXPECT_EQ(pool.unused_resources(), 2U);
     EXPECT_EQ(new_pool.unused_resources(), 1U);
 
-    EXPECT_EQ(dummy_one::m_count, 3U);
+    EXPECT_EQ(dummy_one::m_count, 3);
 
     pool.free_unused();
     new_pool.free_unused();
 
-    EXPECT_EQ(dummy_one::m_count, 0U);
+    EXPECT_EQ(dummy_one::m_count, 0);
 }
 
 /// Test copy assignment works
-TEST(TestResourcePool, CopyAssignment)
+TEST(test_resource_pool, copy_assignment)
 {
     recycle::resource_pool<dummy_one> pool;
 
@@ -305,13 +320,13 @@ TEST(TestResourcePool, CopyAssignment)
     recycle::resource_pool<dummy_one> new_pool;
     new_pool = pool;
 
-    EXPECT_EQ(dummy_one::m_count, 3U);
+    EXPECT_EQ(dummy_one::m_count, 3);
     auto o3 = new_pool.allocate();
-    EXPECT_EQ(dummy_one::m_count, 3U);
+    EXPECT_EQ(dummy_one::m_count, 3);
 }
 
 /// Test move constructor
-TEST(TestResourcePool, MoveConstructor)
+TEST(test_resource_pool, move_constructor)
 {
     recycle::resource_pool<dummy_one> pool;
 
@@ -327,7 +342,7 @@ TEST(TestResourcePool, MoveConstructor)
 }
 
 /// Test move assignment
-TEST(TestResourcePool, MoveAssignment)
+TEST(test_resource_pool, move_assignment)
 {
     recycle::resource_pool<dummy_one> pool;
 
@@ -346,7 +361,7 @@ TEST(TestResourcePool, MoveAssignment)
 
 /// Test that copy assignment works when we copy from an object with
 /// recycle functionality
-TEST(TestResourcePool, CopyRecycle)
+TEST(test_resource_pool, copy_recycle)
 {
     uint32_t recycled = 0;
 
@@ -369,14 +384,14 @@ TEST(TestResourcePool, CopyRecycle)
 
     auto o1 = new_pool.allocate();
 
-    EXPECT_EQ(dummy_two::m_count, 1U);
+    EXPECT_EQ(dummy_two::m_count, 1);
 
     o1.reset();
     EXPECT_EQ(recycled, 1U);
 
     new_pool.free_unused();
 
-    EXPECT_EQ(dummy_two::m_count, 0U);
+    EXPECT_EQ(dummy_two::m_count, 0);
 }
 
 /// Test that we are thread safe
@@ -389,7 +404,7 @@ namespace
     };
 }
 
-TEST(TestResourcePool, Thread)
+TEST(test_resource_pool, thread)
 {
     uint32_t recycled = 0;
 
@@ -447,4 +462,20 @@ TEST(TestResourcePool, Thread)
     {
         t[i].join();
     }
+}
+
+/// Test that the pool works for enable_shared_from_this objects, even if
+/// we do not provide the allocator
+TEST(test_resource_pool, enable_shared_from_this)
+{
+    {
+        recycle::resource_pool<dummy_three> pool;
+
+        auto o1 = pool.allocate();
+        EXPECT_EQ(1U, o1.use_count());
+
+        EXPECT_EQ(dummy_three::m_count, 1);
+    }
+
+    EXPECT_EQ(dummy_three::m_count, 0);
 }
