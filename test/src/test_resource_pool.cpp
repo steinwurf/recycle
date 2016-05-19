@@ -237,7 +237,6 @@ TEST(test_resource_pool, pool_die_before_object)
             d2 = pool.allocate();
             d3 = pool.allocate();
 
-            // EXPECT_EQ(pool.total_resources(), 3U);
             EXPECT_EQ(dummy_one::m_count, 3);
         }
 
@@ -451,13 +450,13 @@ TEST(test_resource_pool, thread)
     const uint32_t number_threads = 8;
     std::thread t[number_threads];
 
-    //Launch a group of threads
+    // Launch a group of threads
     for (uint32_t i = 0; i < number_threads; ++i)
     {
         t[i] = std::thread(run);
     }
 
-    //Join the threads with the main thread
+    // Join the threads with the main thread
     for (uint32_t i = 0; i < number_threads; ++i)
     {
         t[i].join();
@@ -472,7 +471,7 @@ TEST(test_resource_pool, enable_shared_from_this)
         recycle::resource_pool<dummy_three> pool;
 
         auto o1 = pool.allocate();
-        EXPECT_EQ(1U, o1.use_count());
+        EXPECT_EQ(o1.use_count(), 1);
 
         EXPECT_EQ(dummy_three::m_count, 1);
     }
