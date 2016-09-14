@@ -8,7 +8,7 @@
 
 #include <gtest/gtest.h>
 
-GTEST_API_ int main(int argc, char **argv)
+GTEST_API_ int main(int argc, char** argv)
 {
     srand(static_cast<uint32_t>(time(0)));
 

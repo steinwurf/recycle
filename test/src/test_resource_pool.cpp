@@ -252,15 +252,15 @@ TEST(test_resource_pool, recycle)
     uint32_t recycled = 0;
 
     auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
-        {
-            EXPECT_TRUE((bool) o);
-            ++recycled;
-        };
+    {
+        EXPECT_TRUE((bool) o);
+        ++recycled;
+    };
 
     auto make = []()->std::shared_ptr<dummy_two>
-        {
-            return std::make_shared<dummy_two>(3U);
-        };
+    {
+        return std::make_shared<dummy_two>(3U);
+    };
 
     recycle::resource_pool<dummy_two> pool(make, recycle);
 
@@ -365,15 +365,15 @@ TEST(test_resource_pool, copy_recycle)
     uint32_t recycled = 0;
 
     auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
-        {
-            EXPECT_TRUE((bool) o);
-            ++recycled;
-        };
+    {
+        EXPECT_TRUE((bool) o);
+        ++recycled;
+    };
 
     auto make = []()->std::shared_ptr<dummy_two>
-        {
-            return std::make_shared<dummy_two>(3U);
-        };
+    {
+        return std::make_shared<dummy_two>(3U);
+    };
 
     recycle::resource_pool<dummy_two> pool(make, recycle);
     recycle::resource_pool<dummy_two> new_pool = pool;
@@ -408,15 +408,15 @@ TEST(test_resource_pool, thread)
     uint32_t recycled = 0;
 
     auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
-        {
-            EXPECT_TRUE((bool) o);
-            ++recycled;
-        };
+    {
+        EXPECT_TRUE((bool) o);
+        ++recycled;
+    };
 
     auto make = []()->std::shared_ptr<dummy_two>
-        {
-            return std::make_shared<dummy_two>(3U);
-        };
+    {
+        return std::make_shared<dummy_two>(3U);
+    };
 
     // The pool we will use
     using pool_type = recycle::resource_pool<dummy_two, lock_policy>;
@@ -426,25 +426,25 @@ TEST(test_resource_pool, thread)
     // Lambda the threads will execute captures a reference to the pool
     // so they will all operate on the same pool concurrently
     auto run = [&pool]()
+    {
         {
-            {
-                auto a1 = pool.allocate();
-            }
+            auto a1 = pool.allocate();
+        }
 
-            auto a2 = pool.allocate();
-            auto a3 = pool.allocate();
+        auto a2 = pool.allocate();
+        auto a3 = pool.allocate();
 
-            {
-                auto a4 = pool.allocate();
-            }
+        {
+            auto a4 = pool.allocate();
+        }
 
-            pool_type new_pool = pool;
+        pool_type new_pool = pool;
 
-            auto b1 = new_pool.allocate();
-            auto b2 = new_pool.allocate();
+        auto b1 = new_pool.allocate();
+        auto b2 = new_pool.allocate();
 
-            pool.free_unused();
-        };
+        pool.free_unused();
+    };
 
 
     const uint32_t number_threads = 8;
