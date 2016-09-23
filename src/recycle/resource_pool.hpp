@@ -78,7 +78,7 @@ namespace recycle
         >
         resource_pool() :
             m_pool(std::make_shared<impl>(
-                       allocate_function(std::make_shared<value_type>)))
+                allocate_function(std::make_shared<value_type>)))
         { }
 
         /// Create a resource pool using a specific allocate function.
