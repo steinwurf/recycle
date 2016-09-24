@@ -18,92 +18,92 @@
 // ODF (one-definition-rule) in other translation units
 namespace
 {
-    // Default constructible dummy object
-    struct dummy_one
+// Default constructible dummy object
+struct dummy_one
+{
+    dummy_one()
     {
-        dummy_one()
-        {
-            ++m_count;
-        }
-
-        ~dummy_one()
-        {
-            --m_count;
-        }
-
-        // Counter which will check how many object have been allocate
-        // and deallocated
-        static int32_t m_count;
-    };
-
-    int32_t dummy_one::m_count = 0;
-
-    std::shared_ptr<dummy_one> make_dummy_one()
-    {
-        return std::make_shared<dummy_one>();
+        ++m_count;
     }
 
-    // Non Default constructible dummy object
-    struct dummy_two
+    ~dummy_one()
     {
-        dummy_two(uint32_t)
-        {
-            ++m_count;
-        }
-
-        ~dummy_two()
-        {
-            --m_count;
-        }
-
-        static int32_t m_count;
-    };
-
-    int32_t dummy_two::m_count = 0;
-
-    std::shared_ptr<dummy_two> make_dummy_two(uint32_t v)
-    {
-        return std::make_shared<dummy_two>(v);
+        --m_count;
     }
 
-    // enable_shared_from_this dummy object
-    struct dummy_three : std::enable_shared_from_this<dummy_three>
+    // Counter which will check how many object have been allocate
+    // and deallocated
+    static int32_t m_count;
+};
+
+int32_t dummy_one::m_count = 0;
+
+std::shared_ptr<dummy_one> make_dummy_one()
+{
+    return std::make_shared<dummy_one>();
+}
+
+// Non Default constructible dummy object
+struct dummy_two
+{
+    dummy_two(uint32_t)
     {
+        ++m_count;
+    }
 
-        dummy_three()
-        {
-            ++m_count;
-        }
+    ~dummy_two()
+    {
+        --m_count;
+    }
 
-        ~dummy_three()
-        {
-            --m_count;
-        }
+    static int32_t m_count;
+};
 
-        // Counter which will check how many object have been allocate
-        // and deallocated
-        static int32_t m_count;
-    };
+int32_t dummy_two::m_count = 0;
 
-    int32_t dummy_three::m_count = 0;
+std::shared_ptr<dummy_two> make_dummy_two(uint32_t v)
+{
+    return std::make_shared<dummy_two>(v);
+}
+
+// enable_shared_from_this dummy object
+struct dummy_three : std::enable_shared_from_this<dummy_three>
+{
+
+    dummy_three()
+    {
+        ++m_count;
+    }
+
+    ~dummy_three()
+    {
+        --m_count;
+    }
+
+    // Counter which will check how many object have been allocate
+    // and deallocated
+    static int32_t m_count;
+};
+
+int32_t dummy_three::m_count = 0;
 }
 
 /// Test that our resource pool is a regular type. We are not
 /// implementing equality or less than here, but maybe we could.
 namespace
 {
-    /// This code checks whether a type is regular or not. See the
-    /// Eric Niebler's talk from C++Now
-    /// 2014. http://youtu.be/zgOF4NrQllo
-    template<class T>
-    struct is_regular :
-        std::integral_constant<bool,
-        std::is_default_constructible<T>::value &&
-        std::is_copy_constructible<T>::value &&
-        std::is_move_constructible<T>::value &&
-        std::is_copy_assignable<T>::value &&
-        std::is_move_assignable<T>::value>
-    { };
+/// This code checks whether a type is regular or not. See the
+/// Eric Niebler's talk from C++Now
+/// 2014. http://youtu.be/zgOF4NrQllo
+template<class T>
+struct is_regular :
+    std::integral_constant<bool,
+    std::is_default_constructible<T>::value &&
+    std::is_copy_constructible<T>::value &&
+    std::is_move_constructible<T>::value &&
+    std::is_copy_assignable<T>::value &&
+    std::is_move_assignable<T>::value>
+{ };
 }
 
 TEST(test_resource_pool, regular_type)
@@ -396,11 +396,11 @@ TEST(test_resource_pool, copy_recycle)
 /// Test that we are thread safe
 namespace
 {
-    struct lock_policy
-    {
-        using mutex_type = std::mutex;
-        using lock_type = std::lock_guard<mutex_type>;
-    };
+struct lock_policy
+{
+    using mutex_type = std::mutex;
+    using lock_type = std::lock_guard<mutex_type>;
+};
 }
 
 TEST(test_resource_pool, thread)
