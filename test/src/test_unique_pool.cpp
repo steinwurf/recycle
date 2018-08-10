@@ -229,9 +229,9 @@ TEST(test_unique_pool, pool_die_before_object)
         {
             recycle::unique_pool<dummy_one> pool;
 
-            d1 = std::move(pool.allocate());
-            d2 = std::move(pool.allocate());
-            d3 = std::move(pool.allocate());
+            d1 = pool.allocate();
+            d2 = pool.allocate();
+            d3 = pool.allocate();
 
             EXPECT_EQ(dummy_one::m_count, 3);
         }
