@@ -6,7 +6,8 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Major: Rename resource_pool to shared_pool
+* Minor: Adding unique_pool
 
 3.0.0
 -----

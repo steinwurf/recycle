@@ -18,18 +18,17 @@
 
 namespace recycle
 {
-/// @brief The resource pool stores value objects and recycles them.
+/// @brief The shared pool stores value objects and recycles them.
 ///
-/// The resource pool is a useful construct if you have some
+/// The shared pool is a useful construct if you have some
 /// expensive to create objects where you would like to create a
 /// factory capable of recycling the objects.
 ///
 ///
-template<class Value, class LockingPolicy = no_locking_policy>
-class resource_pool
+template <class Value, class LockingPolicy = no_locking_policy>
+class shared_pool
 {
 public:
-
     /// The type managed
     using value_type = Value;
 
@@ -54,13 +53,12 @@ public:
     using lock_type = typename LockingPolicy::lock_type;
 
 public:
-
     /// Default constructor, we only want this to be available
-    /// i.e. the resource_pool to be default constructible if the
+    /// i.e. the shared_pool to be default constructible if the
     /// value_type we build is default constructible.
     ///
     /// This means that we only want
-    /// std::is_default_constructible<resource_pool<T>>::value to
+    /// std::is_default_constructible<shared_pool<T>>::value to
     /// be true if the type T is default constructible.
     ///
     /// Unfortunately this does not work if we don't do the
@@ -70,54 +68,53 @@ public:
     ///
     /// It looks quite ugly and if somebody can fix in a simpler way
     /// please do :)
-    template
-    <
-        class T = Value,
-        typename std::enable_if<
-            std::is_default_constructible<T>::value, uint8_t>::type = 0
-    >
-    resource_pool() :
+    template <class T = Value,
+              typename std::enable_if<std::is_default_constructible<T>::value,
+                                      uint8_t>::type = 0>
+    shared_pool() :
         m_pool(std::make_shared<impl>(
             allocate_function(std::make_shared<value_type>)))
-    { }
+    {
+    }
 
-    /// Create a resource pool using a specific allocate function.
+    /// Create a shared pool using a specific allocate function.
     /// @param allocate Allocation function
-    resource_pool(allocate_function allocate) :
+    shared_pool(allocate_function allocate) :
         m_pool(std::make_shared<impl>(std::move(allocate)))
-    { }
+    {
+    }
 
-    /// Create a resource pool using a specific allocate function and
+    /// Create a shared pool using a specific allocate function and
     /// recycle function.
     /// @param allocate Allocation function
     /// @param recycle Recycle function
-    resource_pool(allocate_function allocate, recycle_function recycle) :
-        m_pool(std::make_shared<impl>(std::move(allocate),
-                                      std::move(recycle)))
-    { }
+    shared_pool(allocate_function allocate, recycle_function recycle) :
+        m_pool(std::make_shared<impl>(std::move(allocate), std::move(recycle)))
+    {
+    }
 
     /// Copy constructor
-    resource_pool(const resource_pool& other) :
+    shared_pool(const shared_pool& other) :
         m_pool(std::make_shared<impl>(*other.m_pool))
-    { }
+    {
+    }
 
     /// Move constructor
-    resource_pool(resource_pool&& other) :
-        m_pool(std::move(other.m_pool))
+    shared_pool(shared_pool&& other) : m_pool(std::move(other.m_pool))
     {
         assert(m_pool);
     }
 
     /// Copy assignment
-    resource_pool& operator=(const resource_pool& other)
+    shared_pool& operator=(const shared_pool& other)
     {
-        resource_pool tmp(other);
+        shared_pool tmp(other);
         std::swap(*this, tmp);
         return *this;
     }
 
     /// Move assignment
-    resource_pool& operator=(resource_pool&& other)
+    shared_pool& operator=(shared_pool&& other)
     {
         m_pool = std::move(other.m_pool);
         return *this;
@@ -145,7 +142,6 @@ public:
     }
 
 private:
-
     /// The actual pool implementation. We use the
     /// enable_shared_from_this helper to make sure we can pass a
     /// "back-pointer" to the pooled objects. The idea behind this
@@ -153,18 +149,16 @@ private:
     /// into the pool once they go out of scope.
     struct impl : public std::enable_shared_from_this<impl>
     {
-        /// @copydoc resource_pool::resource_pool(allocate_function)
-        impl(allocate_function allocate) :
-            m_allocate(std::move(allocate))
+        /// @copydoc shared_pool::shared_pool(allocate_function)
+        impl(allocate_function allocate) : m_allocate(std::move(allocate))
         {
             assert(m_allocate);
         }
 
-        /// @copydoc resource_pool::resource_pool(allocate_function,
+        /// @copydoc shared_pool::shared_pool(allocate_function,
         ///                                       recycle_function)
         impl(allocate_function allocate, recycle_function recycle) :
-            m_allocate(std::move(allocate)),
-            m_recycle(std::move(recycle))
+            m_allocate(std::move(allocate)), m_recycle(std::move(recycle))
         {
             assert(m_allocate);
             assert(m_recycle);
@@ -173,8 +167,7 @@ private:
         /// Copy constructor
         impl(const impl& other) :
             std::enable_shared_from_this<impl>(other),
-            m_allocate(other.m_allocate),
-            m_recycle(other.m_recycle)
+            m_allocate(other.m_allocate), m_recycle(other.m_recycle)
         {
             uint32_t size = other.unused_resources();
             for (uint32_t i = 0; i < size; ++i)
@@ -189,7 +182,8 @@ private:
             m_allocate(std::move(other.m_allocate)),
             m_recycle(std::move(other.m_recycle)),
             m_free_list(std::move(other.m_free_list))
-        { }
+        {
+        }
 
         /// Copy assignment
         impl& operator=(const impl& other)
@@ -248,14 +242,14 @@ private:
             return value_ptr(resource.get(), deleter(pool, resource));
         }
 
-        /// @copydoc resource_pool::free_unused()
+        /// @copydoc shared_pool::free_unused()
         void free_unused()
         {
             lock_type lock(m_mutex);
             m_free_list.clear();
         }
 
-        /// @copydoc resource_pool::unused_resources()
+        /// @copydoc shared_pool::unused_resources()
         uint32_t unused_resources() const
         {
             lock_type lock(m_mutex);
@@ -276,7 +270,6 @@ private:
         }
 
     private:
-
         /// The allocator to use
         allocate_function m_allocate;
 
@@ -302,10 +295,8 @@ private:
     struct deleter
     {
         /// @param pool. A weak_ptr to the pool
-        deleter(const std::weak_ptr<impl>& pool,
-                const value_ptr& resource) :
-            m_pool(pool),
-            m_resource(resource)
+        deleter(const std::weak_ptr<impl>& pool, const value_ptr& resource) :
+            m_pool(pool), m_resource(resource)
         {
             assert(!m_pool.expired());
             assert(m_resource);
@@ -370,7 +361,7 @@ private:
             // +----------+            +--------+
             //
             // The std::shared_ptr on the right is the one managed by the
-            // resource pool, it is the one actually deleting the
+            // shared pool, it is the one actually deleting the
             // object when it goes out of scope. The shared_ptr on the
             // left is the one which contains the custom
             // deleter that will return the object into the resource
@@ -389,8 +380,7 @@ private:
     };
 
 private:
-
     // The pool impl
     std::shared_ptr<impl> m_pool;
 };
-}
+} // namespace recycle
