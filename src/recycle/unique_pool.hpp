@@ -30,8 +30,8 @@ class unique_pool
 {
 private:
     /// Forward declare
-    class deleter;
-    class impl;
+    struct deleter;
+    struct impl;
 
 public:
     /// The type managed
