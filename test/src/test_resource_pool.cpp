@@ -249,14 +249,18 @@ TEST(test_shared_pool, recycle)
 {
     uint32_t recycled = 0;
 
-    auto recycle = [&recycled](std::shared_ptr<dummy_two> o) {
+    // clang-format off
+    auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::shared_ptr<dummy_two> {
+    auto make = []() -> std::shared_ptr<dummy_two>
+    {
         return std::make_shared<dummy_two>(3U);
     };
+    // clang-format on
 
     recycle::shared_pool<dummy_two> pool(make, recycle);
 
