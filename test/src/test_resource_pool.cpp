@@ -95,15 +95,17 @@ namespace
 /// This code checks whether a type is regular or not. See the
 /// Eric Niebler's talk from C++Now
 /// 2014. http://youtu.be/zgOF4NrQllo
+// clang-format off
 template <class T>
 struct is_regular
     : std::integral_constant<bool, std::is_default_constructible<T>::value &&
-                                       std::is_copy_constructible<T>::value &&
-                                       std::is_move_constructible<T>::value &&
-                                       std::is_copy_assignable<T>::value &&
-                                       std::is_move_assignable<T>::value>
+      std::is_copy_constructible<T>::value &&
+      std::is_move_constructible<T>::value &&
+      std::is_copy_assignable<T>::value &&
+      std::is_move_assignable<T>::value>
 {
 };
+// clang-format on
 }
 
 TEST(test_shared_pool, regular_type)
