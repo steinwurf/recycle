@@ -188,9 +188,12 @@ TEST(test_shared_pool, non_default_constructable)
     EXPECT_EQ(dummy_two::m_count, 0);
 
     {
-        auto make = []() -> std::shared_ptr<dummy_two> {
+        // clang-format off
+        auto make = []() -> std::shared_ptr<dummy_two>
+        {
             return std::make_shared<dummy_two>(3U);
         };
+        // clang-format on
 
         recycle::shared_pool<dummy_two> pool(make);
 
@@ -364,14 +367,18 @@ TEST(test_shared_pool, copy_recycle)
 {
     uint32_t recycled = 0;
 
-    auto recycle = [&recycled](std::shared_ptr<dummy_two> o) {
+    // clang-format off
+    auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::shared_ptr<dummy_two> {
+    auto make = []() -> std::shared_ptr<dummy_two>
+    {
         return std::make_shared<dummy_two>(3U);
     };
+    // clang-format on
 
     recycle::shared_pool<dummy_two> pool(make, recycle);
     recycle::shared_pool<dummy_two> new_pool = pool;
@@ -405,14 +412,18 @@ TEST(test_shared_pool, thread)
 {
     uint32_t recycled = 0;
 
-    auto recycle = [&recycled](std::shared_ptr<dummy_two> o) {
+    // clang-format off
+    auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::shared_ptr<dummy_two> {
+    auto make = []() -> std::shared_ptr<dummy_two>
+    {
         return std::make_shared<dummy_two>(3U);
     };
+    // clang-format on
 
     // The pool we will use
     using pool_type = recycle::shared_pool<dummy_two, lock_policy>;
