@@ -9,11 +9,25 @@ recycle is an implementation of a simple c++ resource pool.
 Usage
 -----
 
-The ``recycle::resource_pool`` is useful when managing expensive to
-construct objects. The life-time of the managed objects is controlled
-by using ``std::shared_ptr``. A custom deleter is used to reclaim
-objects in the pool when the last remaining ``std::shared_ptr`` owning
-the object is destroyed.
+The ``recycle`` project contains two types of resource pools:
+
+1. The ``recycle::shared_pool`` is useful when managing expensive to
+   construct objects. The life-time of the managed objects is controlled
+   by using ``std::shared_ptr``. A custom deleter is used to reclaim
+   objects in the pool when the last remaining ``std::shared_ptr`` owning
+   the object is destroyed.
+
+2. The ``recycle::unique_pool`` works the same way as the
+   ``recycle::shared_pool`` but instead uses ``std::unique_ptr`` for
+   managing the resources. Still we need a custom deleter - with
+   ``std::unique_ptr`` this has to be part of the type. So the
+   ``std::unique_ptr`` returned by ``recycle::unique_pool`` is
+   of type ``recycle::unique_pool::pool_ptr``.
+
+Besides the fact that ``recycle::shared_pool`` manages ``std::shared_ptr`` and
+``recycle::unique_pool`` manages ``std::unique_ptr`` the API should be the
+same. So in the following you can replace ``shared`` with ``unique`` to
+swap the behavior.
 
 Header-only
 ...........
@@ -22,7 +36,7 @@ The library itself is header-only so essentially to use it you just
 have to clone the repository and setup the right include paths in the
 project where you would like to use it.
 
-The library uses c++11 features such as variadic templates, so you
+The library uses C++11 features such as variadic templates, so you
 need a relatively recent compiler to use it.
 
 Allocating Objects
@@ -37,7 +51,7 @@ Example:
 
 ::
 
-   #include <recycle/resource_pool.hpp>
+   #include <recycle/shared_pool.hpp>
    #include <cassert>
 
    struct heavy_object
@@ -46,7 +60,7 @@ Example:
    };
 
 
-   recycle::resource_pool<heavy_object> pool;
+   recycle::shared_pool<heavy_object> pool;
 
    // Initially the pool is empty
    assert(pool.unused_resources() == 0U);
@@ -59,7 +73,7 @@ Example:
    assert(pool.unused_resources() == 1U);
 
 In this case we use the default constructor of the
-``recycle::resource_pool`` this will only work if the object in this
+``recycle::shared_pool`` this will only work if the object in this
 case ``heavy_object`` is default constructible (i.e. has a constructor
 which takes no arguments). Internally the resource pool uses
 ``std::make_shared`` to allocate the object.
@@ -71,7 +85,7 @@ Example:
 
 ::
 
-   #include <recycle/resource_pool.hpp>
+   #include <recycle/shared_pool.hpp>
    #include <memory>
 
    struct heavy_object
@@ -86,7 +100,7 @@ Example:
             return std::make_shared<heavy_object>(300000U);
         };
 
-   recycle::resource_pool<heavy_object> pool(make);
+   recycle::shared_pool<heavy_object> pool(make);
 
    auto o1 = pool.allocate();
 
@@ -101,7 +115,7 @@ certain clean-up operations are performed before objects get stored in
 the pool. This can be open file handles etc. which should be
 closed. We cannot rely on the destructor for this when using a resource pool.
 
-To support this the ``recycle::resource_pool`` support a custom
+To support this the ``recycle::shared_pool`` support a custom
 recycle function which will be called right before an object is about
 to go back into the pool.
 
@@ -109,7 +123,7 @@ Example:
 
 ::
 
-   #include <recycle/resource_pool.hpp>
+   #include <recycle/shared_pool.hpp>
    #include <memory>
 
    struct heavy_object
@@ -130,7 +144,7 @@ Example:
         };
 
 
-   recycle::resource_pool<heavy_object> pool(make, recycle);
+   recycle::shared_pool<heavy_object> pool(make, recycle);
 
    {
        auto o1 = pool.allocate();
@@ -152,7 +166,7 @@ Example:
 
 ::
 
-   #include <recycle/resource_pool.hpp>
+   #include <recycle/shared_pool.hpp>
    #include <mutex>
    #include <thread>
 
@@ -167,7 +181,7 @@ Example:
        using lock_type = std::lock_guard<mutex_type>;
    };
 
-   recycle::resource_pool<heavy_object, lock_policy> pool;
+   recycle::shared_pool<heavy_object, lock_policy> pool;
 
    // Lambda the threads will execute captures a reference to the pool
    // so they will all operate on the same pool concurrently

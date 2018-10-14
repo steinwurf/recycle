@@ -3,7 +3,7 @@
 //
 // Distributed under the "BSD License". See the accompanying LICENSE.rst file.
 
-#include <recycle/shared_pool.hpp>
+#include <recycle/unique_pool.hpp>
 
 #include <cstdint>
 #include <functional>
@@ -38,9 +38,9 @@ struct dummy_one
 
 int32_t dummy_one::m_count = 0;
 
-std::shared_ptr<dummy_one> make_dummy_one()
+std::unique_ptr<dummy_one> make_dummy_one()
 {
-    return std::make_shared<dummy_one>();
+    return std::make_unique<dummy_one>();
 }
 
 // Non Default constructible dummy object
@@ -61,9 +61,9 @@ struct dummy_two
 
 int32_t dummy_two::m_count = 0;
 
-std::shared_ptr<dummy_two> make_dummy_two(uint32_t v)
+std::unique_ptr<dummy_two> make_dummy_two(uint32_t v)
 {
-    return std::make_shared<dummy_two>(v);
+    return std::make_unique<dummy_two>(v);
 }
 
 // enable_shared_from_this dummy object
@@ -95,7 +95,6 @@ namespace
 /// This code checks whether a type is regular or not. See the
 /// Eric Niebler's talk from C++Now
 /// 2014. http://youtu.be/zgOF4NrQllo
-// clang-format off
 template <class T>
 struct is_regular
     : std::integral_constant<bool, std::is_default_constructible<T>::value &&
@@ -105,20 +104,19 @@ struct is_regular
       std::is_move_assignable<T>::value>
 {
 };
-// clang-format on
 }
 
-TEST(test_shared_pool, regular_type)
+TEST(test_unique_pool, regular_type)
 {
-    EXPECT_TRUE(is_regular<recycle::shared_pool<dummy_one>>::value);
-    EXPECT_FALSE(is_regular<recycle::shared_pool<dummy_two>>::value);
+    EXPECT_TRUE(is_regular<recycle::unique_pool<dummy_one>>::value);
+    EXPECT_FALSE(is_regular<recycle::unique_pool<dummy_two>>::value);
 }
 
 /// Test the basic API construct and free some objects
-TEST(test_shared_pool, api)
+TEST(test_unique_pool, api)
 {
     {
-        recycle::shared_pool<dummy_one> pool;
+        recycle::unique_pool<dummy_one> pool;
 
         EXPECT_EQ(pool.unused_resources(), 0U);
 
@@ -154,12 +152,12 @@ TEST(test_shared_pool, api)
 }
 
 /// Test the pool works with std::bind
-TEST(test_shared_pool, bind)
+TEST(test_unique_pool, bind)
 {
     {
-        recycle::shared_pool<dummy_one> pool_one(std::bind(make_dummy_one));
+        recycle::unique_pool<dummy_one> pool_one(std::bind(make_dummy_one));
 
-        recycle::shared_pool<dummy_two> pool_two(std::bind(make_dummy_two, 4U));
+        recycle::unique_pool<dummy_two> pool_two(std::bind(make_dummy_two, 4U));
 
         auto o1 = pool_one.allocate();
         auto o2 = pool_two.allocate();
@@ -174,10 +172,10 @@ TEST(test_shared_pool, bind)
 
 /// Test that the pool works for non default constructable objects, if
 /// we provide the allocator
-TEST(test_shared_pool, non_default_constructable)
+TEST(test_unique_pool, non_default_constructable)
 {
     {
-        recycle::shared_pool<dummy_two> pool(std::bind(make_dummy_two, 4U));
+        recycle::unique_pool<dummy_two> pool(std::bind(make_dummy_two, 4U));
 
         auto o1 = pool.allocate();
         auto o2 = pool.allocate();
@@ -188,14 +186,12 @@ TEST(test_shared_pool, non_default_constructable)
     EXPECT_EQ(dummy_two::m_count, 0);
 
     {
-        // clang-format off
-        auto make = []() -> std::shared_ptr<dummy_two>
+        auto make = []() -> std::unique_ptr<dummy_two>
         {
-            return std::make_shared<dummy_two>(3U);
+            return std::make_unique<dummy_two>(3U);
         };
-        // clang-format on
 
-        recycle::shared_pool<dummy_two> pool(make);
+        recycle::unique_pool<dummy_two> pool(make);
 
         auto o1 = pool.allocate();
         auto o2 = pool.allocate();
@@ -208,10 +204,10 @@ TEST(test_shared_pool, non_default_constructable)
 
 /// Test that the pool works for non constructable objects, even if
 /// we do not provide the allocator
-TEST(test_shared_pool, default_constructable)
+TEST(test_unique_pool, default_constructable)
 {
     {
-        recycle::shared_pool<dummy_one> pool;
+        recycle::unique_pool<dummy_one> pool;
 
         auto o1 = pool.allocate();
         auto o2 = pool.allocate();
@@ -224,15 +220,15 @@ TEST(test_shared_pool, default_constructable)
 
 /// Test that everything works even if the pool dies before the
 /// objects allocated
-TEST(test_shared_pool, pool_die_before_object)
+TEST(test_unique_pool, pool_die_before_object)
 {
     {
-        std::shared_ptr<dummy_one> d1;
-        std::shared_ptr<dummy_one> d2;
-        std::shared_ptr<dummy_one> d3;
+        recycle::unique_pool<dummy_one>::pool_ptr d1;
+        recycle::unique_pool<dummy_one>::pool_ptr d2;
+        recycle::unique_pool<dummy_one>::pool_ptr d3;
 
         {
-            recycle::shared_pool<dummy_one> pool;
+            recycle::unique_pool<dummy_one> pool;
 
             d1 = pool.allocate();
             d2 = pool.allocate();
@@ -248,24 +244,22 @@ TEST(test_shared_pool, pool_die_before_object)
 }
 
 /// Test that the recycle functionality works
-TEST(test_shared_pool, recycle)
+TEST(test_unique_pool, recycle)
 {
     uint32_t recycled = 0;
 
-    // clang-format off
-    auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
     {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::shared_ptr<dummy_two>
+    auto make = []() -> std::unique_ptr<dummy_two>
     {
-        return std::make_shared<dummy_two>(3U);
+        return std::make_unique<dummy_two>(3U);
     };
-    // clang-format on
 
-    recycle::shared_pool<dummy_two> pool(make, recycle);
+    recycle::unique_pool<dummy_two> pool(make, recycle);
 
     auto o1 = pool.allocate();
     o1.reset();
@@ -282,16 +276,16 @@ TEST(test_shared_pool, recycle)
 ///     T a = c; T b = c; a = d; assert(b == c);
 ///     T a = c; T b = c; zap(a); assert(b == c && a != b);
 ///
-TEST(test_shared_pool, copy_constructor)
+TEST(test_unique_pool, copy_constructor)
 {
-    recycle::shared_pool<dummy_one> pool;
+    recycle::unique_pool<dummy_one> pool;
 
     auto o1 = pool.allocate();
     auto o2 = pool.allocate();
 
     o1.reset();
 
-    recycle::shared_pool<dummy_one> new_pool(pool);
+    recycle::unique_pool<dummy_one> new_pool(pool);
 
     EXPECT_EQ(pool.unused_resources(), 1U);
     EXPECT_EQ(new_pool.unused_resources(), 1U);
@@ -310,16 +304,16 @@ TEST(test_shared_pool, copy_constructor)
 }
 
 /// Test copy assignment works
-TEST(test_shared_pool, copy_assignment)
+TEST(test_unique_pool, copy_assignment)
 {
-    recycle::shared_pool<dummy_one> pool;
+    recycle::unique_pool<dummy_one> pool;
 
     auto o1 = pool.allocate();
     auto o2 = pool.allocate();
 
     o1.reset();
 
-    recycle::shared_pool<dummy_one> new_pool;
+    recycle::unique_pool<dummy_one> new_pool;
     new_pool = pool;
 
     EXPECT_EQ(dummy_one::m_count, 3);
@@ -328,32 +322,32 @@ TEST(test_shared_pool, copy_assignment)
 }
 
 /// Test move constructor
-TEST(test_shared_pool, move_constructor)
+TEST(test_unique_pool, move_constructor)
 {
-    recycle::shared_pool<dummy_one> pool;
+    recycle::unique_pool<dummy_one> pool;
 
     auto o1 = pool.allocate();
     auto o2 = pool.allocate();
 
     o1.reset();
 
-    recycle::shared_pool<dummy_one> new_pool(std::move(pool));
+    recycle::unique_pool<dummy_one> new_pool(std::move(pool));
 
     o2.reset();
     EXPECT_EQ(new_pool.unused_resources(), 2U);
 }
 
 /// Test move assignment
-TEST(test_shared_pool, move_assignment)
+TEST(test_unique_pool, move_assignment)
 {
-    recycle::shared_pool<dummy_one> pool;
+    recycle::unique_pool<dummy_one> pool;
 
     auto o1 = pool.allocate();
     auto o2 = pool.allocate();
 
     o1.reset();
 
-    recycle::shared_pool<dummy_one> new_pool;
+    recycle::unique_pool<dummy_one> new_pool;
     new_pool = std::move(pool);
 
     o2.reset();
@@ -363,25 +357,23 @@ TEST(test_shared_pool, move_assignment)
 
 /// Test that copy assignment works when we copy from an object with
 /// recycle functionality
-TEST(test_shared_pool, copy_recycle)
+TEST(test_unique_pool, copy_recycle)
 {
     uint32_t recycled = 0;
 
-    // clang-format off
-    auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
     {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::shared_ptr<dummy_two>
+    auto make = []() -> std::unique_ptr<dummy_two>
     {
-        return std::make_shared<dummy_two>(3U);
+        return std::make_unique<dummy_two>(3U);
     };
-    // clang-format on
 
-    recycle::shared_pool<dummy_two> pool(make, recycle);
-    recycle::shared_pool<dummy_two> new_pool = pool;
+    recycle::unique_pool<dummy_two> pool(make, recycle);
+    recycle::unique_pool<dummy_two> new_pool = pool;
 
     EXPECT_EQ(pool.unused_resources(), 0U);
     EXPECT_EQ(new_pool.unused_resources(), 0U);
@@ -408,31 +400,28 @@ struct lock_policy
 };
 }
 
-TEST(test_shared_pool, thread)
+TEST(test_unique_pool, thread)
 {
     uint32_t recycled = 0;
 
-    // clang-format off
-    auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
     {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::shared_ptr<dummy_two>
+    auto make = []() -> std::unique_ptr<dummy_two>
     {
-        return std::make_shared<dummy_two>(3U);
+        return std::make_unique<dummy_two>(3U);
     };
-    // clang-format on
 
     // The pool we will use
-    using pool_type = recycle::shared_pool<dummy_two, lock_policy>;
+    using pool_type = recycle::unique_pool<dummy_two, lock_policy>;
 
     pool_type pool(make, recycle);
 
     // Lambda the threads will execute captures a reference to the pool
     // so they will all operate on the same pool concurrently
-    // clang-format off
     auto run = [&pool]()
     {
         {
@@ -453,7 +442,6 @@ TEST(test_shared_pool, thread)
 
         pool.free_unused();
     };
-    // clang-format on
 
     const uint32_t number_threads = 8;
     std::thread t[number_threads];
@@ -473,13 +461,12 @@ TEST(test_shared_pool, thread)
 
 /// Test that the pool works for enable_shared_from_this objects, even if
 /// we do not provide the allocator
-TEST(test_shared_pool, enable_shared_from_this)
+TEST(test_unique_pool, enable_shared_from_this)
 {
     {
-        recycle::shared_pool<dummy_three> pool;
+        recycle::unique_pool<dummy_three> pool;
 
         auto o1 = pool.allocate();
-        EXPECT_EQ(o1.use_count(), 1);
 
         EXPECT_EQ(dummy_three::m_count, 1);
     }
