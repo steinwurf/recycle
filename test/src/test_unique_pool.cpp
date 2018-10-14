@@ -98,10 +98,10 @@ namespace
 template <class T>
 struct is_regular
     : std::integral_constant<bool, std::is_default_constructible<T>::value &&
-                                       std::is_copy_constructible<T>::value &&
-                                       std::is_move_constructible<T>::value &&
-                                       std::is_copy_assignable<T>::value &&
-                                       std::is_move_assignable<T>::value>
+      std::is_copy_constructible<T>::value &&
+      std::is_move_constructible<T>::value &&
+      std::is_copy_assignable<T>::value &&
+      std::is_move_assignable<T>::value>
 {
 };
 }
@@ -186,7 +186,8 @@ TEST(test_unique_pool, non_default_constructable)
     EXPECT_EQ(dummy_two::m_count, 0);
 
     {
-        auto make = []() -> std::unique_ptr<dummy_two> {
+        auto make = []() -> std::unique_ptr<dummy_two>
+        {
             return std::make_unique<dummy_two>(3U);
         };
 
@@ -247,12 +248,14 @@ TEST(test_unique_pool, recycle)
 {
     uint32_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two> {
+    auto make = []() -> std::unique_ptr<dummy_two>
+    {
         return std::make_unique<dummy_two>(3U);
     };
 
@@ -358,12 +361,14 @@ TEST(test_unique_pool, copy_recycle)
 {
     uint32_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two> {
+    auto make = []() -> std::unique_ptr<dummy_two>
+    {
         return std::make_unique<dummy_two>(3U);
     };
 
@@ -399,12 +404,14 @@ TEST(test_unique_pool, thread)
 {
     uint32_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two> {
+    auto make = []() -> std::unique_ptr<dummy_two>
+    {
         return std::make_unique<dummy_two>(3U);
     };
 
@@ -415,7 +422,8 @@ TEST(test_unique_pool, thread)
 
     // Lambda the threads will execute captures a reference to the pool
     // so they will all operate on the same pool concurrently
-    auto run = [&pool]() {
+    auto run = [&pool]()
+    {
         {
             auto a1 = pool.allocate();
         }

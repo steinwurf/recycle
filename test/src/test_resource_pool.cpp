@@ -432,7 +432,9 @@ TEST(test_shared_pool, thread)
 
     // Lambda the threads will execute captures a reference to the pool
     // so they will all operate on the same pool concurrently
-    auto run = [&pool]() {
+    // clang-format off
+    auto run = [&pool]()
+    {
         {
             auto a1 = pool.allocate();
         }
@@ -451,6 +453,7 @@ TEST(test_shared_pool, thread)
 
         pool.free_unused();
     };
+    // clang-format on
 
     const uint32_t number_threads = 8;
     std::thread t[number_threads];

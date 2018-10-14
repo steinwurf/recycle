@@ -108,7 +108,8 @@ public:
     }
 
     /// Move constructor
-    unique_pool(unique_pool&& other) : m_pool(std::move(other.m_pool))
+    unique_pool(unique_pool&& other) :
+        m_pool(std::move(other.m_pool))
     {
         assert(m_pool);
     }
@@ -158,7 +159,8 @@ private:
     struct impl : public std::enable_shared_from_this<impl>
     {
         /// @copydoc unique_pool::unique_pool(allocate_function)
-        impl(allocate_function allocate) : m_allocate(std::move(allocate))
+        impl(allocate_function allocate) :
+            m_allocate(std::move(allocate))
         {
             assert(m_allocate);
         }
