@@ -24,6 +24,11 @@ The ``recycle`` project contains two types of resource pools:
    ``std::unique_ptr`` returned by ``recycle::unique_pool`` is
    of type ``recycle::unique_pool::pool_ptr``.
 
+Besides the fact that ``recycle::shared_pool`` manages ``std::shared_ptr`` and
+``recycle::unique_pool`` manages ``std::unique_ptr`` the API should be the
+same. So in the following you can replace ``shared`` with ``unique`` to
+swap the behavior.
+
 Header-only
 ...........
 
@@ -31,7 +36,7 @@ The library itself is header-only so essentially to use it you just
 have to clone the repository and setup the right include paths in the
 project where you would like to use it.
 
-The library uses c++11 features such as variadic templates, so you
+The library uses C++11 features such as variadic templates, so you
 need a relatively recent compiler to use it.
 
 Allocating Objects
