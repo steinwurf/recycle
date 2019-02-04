@@ -36,7 +36,7 @@ The library itself is header-only so essentially to use it you just
 have to clone the repository and setup the right include paths in the
 project where you would like to use it.
 
-The library uses C++11 features such as variadic templates, so you
+The library uses C++14 features, so you
 need a relatively recent compiler to use it.
 
 Allocating Objects
