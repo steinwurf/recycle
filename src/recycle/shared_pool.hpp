@@ -6,6 +6,7 @@
 #pragma once
 
 #include <algorithm>
+#include <atomic>
 #include <cassert>
 #include <cstdint>
 #include <functional>
@@ -100,8 +101,7 @@ public:
     }
 
     /// Move constructor
-    shared_pool(shared_pool&& other) :
-        m_pool(std::move(other.m_pool))
+    shared_pool(shared_pool&& other) : m_pool(std::move(other.m_pool))
     {
         assert(m_pool);
     }
@@ -128,6 +128,20 @@ public:
         return m_pool->unused_resources();
     }
 
+    /// @returns the number of used resources
+    uint32_t inuse_resources() const
+    {
+        assert(m_pool);
+        return m_pool->inuse_resources();
+    }
+
+    /// @returns the capacity of the memory pool
+    uint32_t capacity() const
+    {
+        assert(m_pool);
+        return m_pool->capacity();
+    }
+
     /// Frees all unused resources
     void free_unused()
     {
@@ -152,7 +166,7 @@ private:
     {
         /// @copydoc shared_pool::shared_pool(allocate_function)
         impl(allocate_function allocate) :
-            m_allocate(std::move(allocate))
+            m_allocate(std::move(allocate)), m_num_allocated(0)
         {
             assert(m_allocate);
         }
@@ -160,7 +174,8 @@ private:
         /// @copydoc shared_pool::shared_pool(allocate_function,
         ///                                       recycle_function)
         impl(allocate_function allocate, recycle_function recycle) :
-            m_allocate(std::move(allocate)), m_recycle(std::move(recycle))
+            m_allocate(std::move(allocate)), m_recycle(std::move(recycle)),
+            m_num_allocated(0)
         {
             assert(m_allocate);
             assert(m_recycle);
@@ -169,7 +184,8 @@ private:
         /// Copy constructor
         impl(const impl& other) :
             std::enable_shared_from_this<impl>(other),
-            m_allocate(other.m_allocate), m_recycle(other.m_recycle)
+            m_allocate(other.m_allocate), m_recycle(other.m_recycle),
+            m_num_allocated(other.m_num_allocated)
         {
             uint32_t size = other.unused_resources();
             for (uint32_t i = 0; i < size; ++i)
@@ -183,7 +199,8 @@ private:
             std::enable_shared_from_this<impl>(other),
             m_allocate(std::move(other.m_allocate)),
             m_recycle(std::move(other.m_recycle)),
-            m_free_list(std::move(other.m_free_list))
+            m_free_list(std::move(other.m_free_list)),
+            m_num_allocated(std::move(other.m_num_allocated))
         {
         }
 
@@ -201,6 +218,7 @@ private:
             m_allocate = std::move(other.m_allocate);
             m_recycle = std::move(other.m_recycle);
             m_free_list = std::move(other.m_free_list);
+            m_num_allocated = std::move(other.m_num_allocated);
             return *this;
         }
 
@@ -223,6 +241,7 @@ private:
             {
                 assert(m_allocate);
                 resource = m_allocate();
+                m_num_allocated++;
             }
 
             auto pool = impl::shared_from_this();
@@ -258,6 +277,19 @@ private:
             return static_cast<uint32_t>(m_free_list.size());
         }
 
+        /// @copydoc shared_pool::inuse_resources()
+        uint32_t inuse_resources() const
+        {
+            assert(m_num_allocated.load() >= unused_resources());
+            return m_num_allocated.load() - unused_resources();
+        }
+
+        /// @copydoc shared_pool::capacity()
+        uint32_t capacity() const
+        {
+            return m_num_allocated.load();
+        }
+
         /// This function called when a resource should be added
         /// back into the pool
         void recycle(const value_ptr& resource)
@@ -288,6 +320,9 @@ private:
         /// threads releases a resource into the free list while
         /// another tries to read its size.
         mutable mutex_type m_mutex;
+
+        /// The number of items allocated so far
+        std::atomic<uint32_t> m_num_allocated;
     };
 
     /// The custom deleter object used by the std::shared_ptr<T>
