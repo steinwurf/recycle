@@ -1,7 +1,7 @@
 recycle
 =======
 
-recycle is an implementation of a simple c++ resource pool.
+recycle is an implementation of a simple C++ resource pool.
 
 .. contents:: Table of Contents:
    :local:
@@ -36,8 +36,8 @@ The library itself is header-only so essentially to use it you just
 have to clone the repository and setup the right include paths in the
 project where you would like to use it.
 
-The library uses C++14 features, so you
-need a relatively recent compiler to use it.
+The library uses C++14 features, so you need a relatively recent compiler
+to use it.
 
 Allocating Objects
 ------------------
@@ -47,9 +47,7 @@ There are two ways we can control how objects are allocated:
 Using the Default Allocator
 ...........................
 
-Example:
-
-::
+Example::
 
    #include <recycle/shared_pool.hpp>
    #include <cassert>
@@ -81,9 +79,7 @@ which takes no arguments). Internally the resource pool uses
 Using a Custom Allocator
 ........................
 
-Example:
-
-::
+Example::
 
    #include <recycle/shared_pool.hpp>
    #include <memory>
@@ -119,9 +115,7 @@ To support this the ``recycle::shared_pool`` support a custom
 recycle function which will be called right before an object is about
 to go back into the pool.
 
-Example:
-
-::
+Example::
 
    #include <recycle/shared_pool.hpp>
    #include <memory>
@@ -159,12 +153,10 @@ Thread Safety
 Since the free lunch is over we want to make sure that the resource
 pool is thread safe.
 
-This can be achieved by specifying a lock policy (we were inspired by
+This can be achieved by specifying a lock policy (we were inspired by the
 flyweight library in Boost).
 
-Example:
-
-::
+Example::
 
    #include <recycle/shared_pool.hpp>
    #include <mutex>
