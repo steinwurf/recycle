@@ -1,6 +1,9 @@
 recycle
 =======
 
+.. image:: https://travis-ci.org/steinwurf/recycle.svg?branch=master
+    :target: https://travis-ci.org/steinwurf/recycle
+
 recycle is an implementation of a simple C++ resource pool.
 
 .. contents:: Table of Contents:
