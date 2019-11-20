@@ -6,7 +6,7 @@ every change, see the Git log.
 
 Latest
 ------
-* tdb
+* Minor: Added CMake build file.
 
 4.0.0
 -----
