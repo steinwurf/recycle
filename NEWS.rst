@@ -6,7 +6,8 @@ every change, see the Git log.
 
 Latest
 ------
-* tbd
+* Patch: Added ``target_compile_features`` to CMake script so that c++14 is
+  used.
 
 4.1.0
 -----

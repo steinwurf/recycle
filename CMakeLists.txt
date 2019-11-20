@@ -4,4 +4,6 @@ project(recycle)
 add_library(recycle INTERFACE)
 add_library(steinwurf::recycle ALIAS recycle)
 
+target_compile_features(mts INTERFACE cxx_std_14)
+
 target_include_directories(recycle INTERFACE src/)
