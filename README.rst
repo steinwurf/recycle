@@ -199,3 +199,14 @@ Example::
    {
        t[i].join();
    }
+
+Use as Dependency in CMake
+--------------------------
+
+To depend on this project when using the CMake build system, add the following
+in your CMake build script::
+
+   add_subdirectory("/path/to/recycle" recycle)
+   target_link_libraries(<my_target> steinwurf::recycle)
+
+Where ``<my_target>`` is replaced by your target.
