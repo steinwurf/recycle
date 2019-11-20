@@ -8,6 +8,10 @@ Latest
 ------
 * tbd
 
+4.1.2
+-----
+* Patch: Fix ``target_compile_features``.
+
 4.1.1
 -----
 * Patch: Added ``target_compile_features`` to CMake script so that c++14 is
