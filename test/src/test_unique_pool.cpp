@@ -46,7 +46,7 @@ std::unique_ptr<dummy_one> make_dummy_one()
 // Non Default constructible dummy object
 struct dummy_two
 {
-    dummy_two(uint32_t)
+    dummy_two(std::size_t)
     {
         ++m_count;
     }
@@ -61,7 +61,7 @@ struct dummy_two
 
 int32_t dummy_two::m_count = 0;
 
-std::unique_ptr<dummy_two> make_dummy_two(uint32_t v)
+std::unique_ptr<dummy_two> make_dummy_two(std::size_t v)
 {
     return std::make_unique<dummy_two>(v);
 }
@@ -98,10 +98,10 @@ namespace
 template <class T>
 struct is_regular
     : std::integral_constant<bool, std::is_default_constructible<T>::value &&
-      std::is_copy_constructible<T>::value &&
-      std::is_move_constructible<T>::value &&
-      std::is_copy_assignable<T>::value &&
-      std::is_move_assignable<T>::value>
+                                       std::is_copy_constructible<T>::value &&
+                                       std::is_move_constructible<T>::value &&
+                                       std::is_copy_assignable<T>::value &&
+                                       std::is_move_assignable<T>::value>
 {
 };
 }
@@ -186,8 +186,7 @@ TEST(test_unique_pool, non_default_constructable)
     EXPECT_EQ(dummy_two::m_count, 0);
 
     {
-        auto make = []() -> std::unique_ptr<dummy_two>
-        {
+        auto make = []() -> std::unique_ptr<dummy_two> {
             return std::make_unique<dummy_two>(3U);
         };
 
@@ -246,16 +245,14 @@ TEST(test_unique_pool, pool_die_before_object)
 /// Test that the recycle functionality works
 TEST(test_unique_pool, recycle)
 {
-    uint32_t recycled = 0;
+    std::size_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
-    {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two>
-    {
+    auto make = []() -> std::unique_ptr<dummy_two> {
         return std::make_unique<dummy_two>(3U);
     };
 
@@ -359,16 +356,14 @@ TEST(test_unique_pool, move_assignment)
 /// recycle functionality
 TEST(test_unique_pool, copy_recycle)
 {
-    uint32_t recycled = 0;
+    std::size_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
-    {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two>
-    {
+    auto make = []() -> std::unique_ptr<dummy_two> {
         return std::make_unique<dummy_two>(3U);
     };
 
@@ -402,16 +397,14 @@ struct lock_policy
 
 TEST(test_unique_pool, thread)
 {
-    uint32_t recycled = 0;
+    std::size_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
-    {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two>
-    {
+    auto make = []() -> std::unique_ptr<dummy_two> {
         return std::make_unique<dummy_two>(3U);
     };
 
@@ -422,8 +415,7 @@ TEST(test_unique_pool, thread)
 
     // Lambda the threads will execute captures a reference to the pool
     // so they will all operate on the same pool concurrently
-    auto run = [&pool]()
-    {
+    auto run = [&pool]() {
         {
             auto a1 = pool.allocate();
         }
@@ -443,17 +435,17 @@ TEST(test_unique_pool, thread)
         pool.free_unused();
     };
 
-    const uint32_t number_threads = 8;
+    const std::size_t number_threads = 8;
     std::thread t[number_threads];
 
     // Launch a group of threads
-    for (uint32_t i = 0; i < number_threads; ++i)
+    for (std::size_t i = 0; i < number_threads; ++i)
     {
         t[i] = std::thread(run);
     }
 
     // Join the threads with the main thread
-    for (uint32_t i = 0; i < number_threads; ++i)
+    for (std::size_t i = 0; i < number_threads; ++i)
     {
         t[i].join();
     }
