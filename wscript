@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 APPNAME = 'recycle'
-VERSION = '4.1.2'
+VERSION = '5.0.0'
 
 
 def build(bld):
