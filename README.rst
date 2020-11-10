@@ -89,7 +89,7 @@ Example::
 
    struct heavy_object
    {
-       heavy_object(uint32_t size);
+       heavy_object(std::size_t size);
 
       // ... some expensive resource
    };
@@ -125,7 +125,7 @@ Example::
 
    struct heavy_object
    {
-       heavy_object(uint32_t size);
+       heavy_object(std::size_t size);
 
       // ... some expensive resource
    };
@@ -185,17 +185,17 @@ Example::
        auto a1 = pool.allocate();
    };
 
-   const uint32_t number_threads = 8;
+   const std::size_t number_threads = 8;
    std::thread t[number_threads];
 
    //Launch a group of threads
-   for (uint32_t i = 0; i < number_threads; ++i)
+   for (std::size_t i = 0; i < number_threads; ++i)
    {
        t[i] = std::thread(run);
    }
 
    //Join the threads with the main thread
-   for (uint32_t i = 0; i < number_threads; ++i)
+   for (std::size_t i = 0; i < number_threads; ++i)
    {
        t[i].join();
    }

@@ -46,7 +46,7 @@ std::shared_ptr<dummy_one> make_dummy_one()
 // Non Default constructible dummy object
 struct dummy_two
 {
-    dummy_two(uint32_t)
+    dummy_two(std::size_t)
     {
         ++m_count;
     }
@@ -61,7 +61,7 @@ struct dummy_two
 
 int32_t dummy_two::m_count = 0;
 
-std::shared_ptr<dummy_two> make_dummy_two(uint32_t v)
+std::shared_ptr<dummy_two> make_dummy_two(std::size_t v)
 {
     return std::make_shared<dummy_two>(v);
 }
@@ -250,7 +250,7 @@ TEST(test_shared_pool, pool_die_before_object)
 /// Test that the recycle functionality works
 TEST(test_shared_pool, recycle)
 {
-    uint32_t recycled = 0;
+    std::size_t recycled = 0;
 
     // clang-format off
     auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
@@ -365,7 +365,7 @@ TEST(test_shared_pool, move_assignment)
 /// recycle functionality
 TEST(test_shared_pool, copy_recycle)
 {
-    uint32_t recycled = 0;
+    std::size_t recycled = 0;
 
     // clang-format off
     auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
@@ -410,7 +410,7 @@ struct lock_policy
 
 TEST(test_shared_pool, thread)
 {
-    uint32_t recycled = 0;
+    std::size_t recycled = 0;
 
     // clang-format off
     auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
@@ -455,17 +455,17 @@ TEST(test_shared_pool, thread)
     };
     // clang-format on
 
-    const uint32_t number_threads = 8;
+    const std::size_t number_threads = 8;
     std::thread t[number_threads];
 
     // Launch a group of threads
-    for (uint32_t i = 0; i < number_threads; ++i)
+    for (std::size_t i = 0; i < number_threads; ++i)
     {
         t[i] = std::thread(run);
     }
 
     // Join the threads with the main thread
-    for (uint32_t i = 0; i < number_threads; ++i)
+    for (std::size_t i = 0; i < number_threads; ++i)
     {
         t[i].join();
     }

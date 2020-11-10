@@ -108,8 +108,7 @@ public:
     }
 
     /// Move constructor
-    unique_pool(unique_pool&& other) :
-        m_pool(std::move(other.m_pool))
+    unique_pool(unique_pool&& other) : m_pool(std::move(other.m_pool))
     {
         assert(m_pool);
     }
@@ -130,7 +129,7 @@ public:
     }
 
     /// @returns the number of unused resources
-    uint32_t unused_resources() const
+    std::size_t unused_resources() const
     {
         assert(m_pool);
         return m_pool->unused_resources();
@@ -159,8 +158,7 @@ private:
     struct impl : public std::enable_shared_from_this<impl>
     {
         /// @copydoc unique_pool::unique_pool(allocate_function)
-        impl(allocate_function allocate) :
-            m_allocate(std::move(allocate))
+        impl(allocate_function allocate) : m_allocate(std::move(allocate))
         {
             assert(m_allocate);
         }
@@ -179,8 +177,8 @@ private:
             std::enable_shared_from_this<impl>(other),
             m_allocate(other.m_allocate), m_recycle(other.m_recycle)
         {
-            uint32_t size = other.unused_resources();
-            for (uint32_t i = 0; i < size; ++i)
+            std::size_t size = other.unused_resources();
+            for (std::size_t i = 0; i < size; ++i)
             {
                 m_free_list.push_back(m_allocate());
             }
@@ -261,10 +259,10 @@ private:
         }
 
         /// @copydoc unique_pool::unused_resources()
-        uint32_t unused_resources() const
+        std::size_t unused_resources() const
         {
             lock_type lock(m_mutex);
-            return static_cast<uint32_t>(m_free_list.size());
+            return m_free_list.size();
         }
 
         /// This function called when a resource should be added
