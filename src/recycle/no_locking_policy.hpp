@@ -41,13 +41,15 @@ struct no_locking_policy
 {
     /// Define dummy mutex type
     struct no_mutex
-    { };
+    {
+    };
 
     /// Define dummy lock type
     struct no_lock
     {
         no_lock(no_mutex&)
-        { }
+        {
+        }
     };
 
     /// The locking policy mutex type
