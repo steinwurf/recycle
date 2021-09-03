@@ -57,10 +57,10 @@ public:
     /// i.e. the shared_pool to be default constructible if the
     /// value_type we build is default constructible.
     ///
-    /// This means that we only want
-    /// std::is_default_constructible<shared_pool<T>>::value to
-    /// be true if the type T is default constructible.
-    ///
+    // This means that we only want
+    // std::is_default_constructible<shared_pool<T>>::value() to
+    // be true if the type T is default constructible.
+    //
     /// Unfortunately this does not work if we don't do the
     /// template magic seen below. What we do there is to use
     /// SFINAE to disable the default constructor for non default
@@ -294,7 +294,8 @@ private:
     /// object contained it will call the operator() define here.
     struct deleter
     {
-        /// @param pool. A weak_ptr to the pool
+        /// @param pool A weak_ptr to the pool
+        /// @param resource A pointer to a value
         deleter(const std::weak_ptr<impl>& pool, const value_ptr& resource) :
             m_pool(pool), m_resource(resource)
         {

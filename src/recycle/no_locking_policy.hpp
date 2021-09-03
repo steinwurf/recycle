@@ -47,6 +47,7 @@ struct no_locking_policy
     /// Define dummy lock type
     struct no_lock
     {
+        /// Constructor
         no_lock(no_mutex&)
         {
         }

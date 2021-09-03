@@ -7,7 +7,7 @@
             "requirements": "${source_path}/docs/requirements.txt",
             "cwd": "${source_path}/docs",
             "tags.semver.filters": [
-                ">0.0.0"
+                ">6.1.0"
             ],
             "workingtree": true,
             "variables": {

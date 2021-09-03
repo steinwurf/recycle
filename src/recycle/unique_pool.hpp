@@ -65,10 +65,10 @@ public:
     /// i.e. the unique_pool to be default constructible if the
     /// value_type we build is default constructible.
     ///
-    /// This means that we only want
-    /// std::is_default_constructible<unique_pool<T>>::value to
-    /// be true if the type T is default constructible.
-    ///
+    // This means that we only want
+    // std::is_default_constructible<unique_pool<T>>::value to
+    // be true if the type T is default constructible.
+    //
     /// Unfortunately this does not work if we don't do the
     /// template magic seen below. What we do there is to use
     /// SFINAE to disable the default constructor for non default
