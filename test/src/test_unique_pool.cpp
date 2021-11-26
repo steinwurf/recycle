@@ -247,7 +247,8 @@ TEST(test_unique_pool, recycle)
 {
     std::size_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
@@ -358,7 +359,8 @@ TEST(test_unique_pool, copy_recycle)
 {
     std::size_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
@@ -399,7 +401,8 @@ TEST(test_unique_pool, thread)
 {
     std::size_t recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o) {
+    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
+    {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
@@ -415,7 +418,8 @@ TEST(test_unique_pool, thread)
 
     // Lambda the threads will execute captures a reference to the pool
     // so they will all operate on the same pool concurrently
-    auto run = [&pool]() {
+    auto run = [&pool]()
+    {
         {
             auto a1 = pool.allocate();
         }
