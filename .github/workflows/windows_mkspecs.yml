@@ -1,4 +1,4 @@
-name: Valgrind
+name: Windows C++ make-specs
 on:
   workflow_dispatch:
     inputs:
@@ -10,8 +10,7 @@ on:
   push:
   pull_request:
 jobs:
-  valgrind:
-    name: Valgrind
-    uses: steinwurf/valgrind-action/.github/workflows/action.yml@2.0.0
+  Windows-mkspecs:
+    uses: steinwurf/windows-mkspecs-action/.github/workflows/action.yml@2.0.0
     with:
       extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
