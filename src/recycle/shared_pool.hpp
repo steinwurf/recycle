@@ -14,7 +14,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "no_locking_policy.hpp"
+#include "recycle/no_locking_policy.hpp"
 
 namespace recycle
 {
