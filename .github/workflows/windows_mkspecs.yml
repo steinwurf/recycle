@@ -11,6 +11,6 @@ on:
   pull_request:
 jobs:
   Windows-mkspecs:
-    uses: steinwurf/windows-mkspecs-action/.github/workflows/action.yml@2.0.0
+    uses: steinwurf/windows-mkspecs-action/.github/workflows/action.yml@2.0.1
     with:
       extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
