@@ -12,6 +12,6 @@ on:
 jobs:
   valgrind:
     name: Valgrind
-    uses: steinwurf/valgrind-action/.github/workflows/action.yml@2.0.0
+    uses: steinwurf/valgrind-action/.github/workflows/action.yml@3.0.0
     with:
       extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
