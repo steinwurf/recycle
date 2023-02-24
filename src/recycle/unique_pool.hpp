@@ -293,7 +293,7 @@ class unique_pool {
         void prefill(size_t count) {
             assert(m_allocate);
             lock_type lock(m_mutex);
-            while (m_free_list.size() < count) {
+            for (size_t pending = count - m_free_list.size(); pending > 0; pending--) {
                 value_ptr resource = m_allocate();
                 m_free_list.push_back(std::move(resource));
             }
