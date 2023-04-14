@@ -82,7 +82,9 @@ There are two ways we can control how objects are allocated:
 Using the Default Allocator
 ...........................
 
-Example::
+Example:
+
+.. code-block:: cpp
 
    #include <recycle/shared_pool.hpp>
    #include <cassert>
@@ -114,7 +116,9 @@ which takes no arguments). Internally the resource pool uses
 Using a Custom Allocator
 ........................
 
-Example::
+Example:
+
+.. code-block:: cpp
 
    #include <recycle/shared_pool.hpp>
    #include <memory>
@@ -150,7 +154,9 @@ To support this the ``recycle::shared_pool`` support a custom
 recycle function which will be called right before an object is about
 to go back into the pool.
 
-Example::
+Example:
+
+.. code-block:: cpp
 
    #include <recycle/shared_pool.hpp>
    #include <memory>
@@ -191,7 +197,9 @@ pool is thread safe.
 This can be achieved by specifying a lock policy (we were inspired by the
 flyweight library in Boost).
 
-Example::
+Example:
+
+.. code-block:: cpp
 
    #include <recycle/shared_pool.hpp>
    #include <mutex>
@@ -236,7 +244,9 @@ Use as Dependency in CMake
 --------------------------
 
 To depend on this project when using the CMake build system, add the following
-in your CMake build script::
+in your CMake build script:
+
+.. code-block:: cmake
 
    add_subdirectory("/path/to/recycle" recycle)
    target_link_libraries(<my_target> steinwurf::recycle)
