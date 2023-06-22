@@ -186,9 +186,8 @@ TEST(test_unique_pool, non_default_constructable)
     EXPECT_EQ(dummy_two::m_count, 0);
 
     {
-        auto make = []() -> std::unique_ptr<dummy_two> {
-            return std::make_unique<dummy_two>(3U);
-        };
+        auto make = []() -> std::unique_ptr<dummy_two>
+        { return std::make_unique<dummy_two>(3U); };
 
         recycle::unique_pool<dummy_two> pool(make);
 
@@ -253,9 +252,8 @@ TEST(test_unique_pool, recycle)
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two> {
-        return std::make_unique<dummy_two>(3U);
-    };
+    auto make = []() -> std::unique_ptr<dummy_two>
+    { return std::make_unique<dummy_two>(3U); };
 
     recycle::unique_pool<dummy_two> pool(make, recycle);
 
@@ -365,9 +363,8 @@ TEST(test_unique_pool, copy_recycle)
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two> {
-        return std::make_unique<dummy_two>(3U);
-    };
+    auto make = []() -> std::unique_ptr<dummy_two>
+    { return std::make_unique<dummy_two>(3U); };
 
     recycle::unique_pool<dummy_two> pool(make, recycle);
     recycle::unique_pool<dummy_two> new_pool = pool;
@@ -407,9 +404,8 @@ TEST(test_unique_pool, thread)
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two> {
-        return std::make_unique<dummy_two>(3U);
-    };
+    auto make = []() -> std::unique_ptr<dummy_two>
+    { return std::make_unique<dummy_two>(3U); };
 
     // The pool we will use
     using pool_type = recycle::unique_pool<dummy_two, lock_policy>;
