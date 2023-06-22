@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 APPNAME = "recycle"
-VERSION = "6.0.0"
+VERSION = "7.0.0"
 
 
 def configure(conf):
