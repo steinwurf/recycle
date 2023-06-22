@@ -6,7 +6,7 @@ VERSION = "6.0.0"
 
 
 def configure(conf):
-    conf.set_cxx_std(11)
+    conf.set_cxx_std(14)
 
 
 def build(bld):
