@@ -8,7 +8,6 @@ name: Cppcheck
   push:
     branches:
     - master
-  pull_request:
 jobs:
   docker_check:
     name: Cppcheck
