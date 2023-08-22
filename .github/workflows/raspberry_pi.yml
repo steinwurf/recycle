@@ -22,20 +22,11 @@ jobs:
       test_binary_directory: build/cxx_raspberry_gxx83_armv7/test
 
 
-# Cancel previous in-progress when pushing: https://stackoverflow.com/a/72408109
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: true
-
-# Cancel previous in-progress when pushing: https://stackoverflow.com/a/72408109
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: true
 
 
 
-# Cancel previous in-progress when pushing: https://stackoverflow.com/a/72408109
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
-  cancel-in-progress: true
+
+
+
+
 
