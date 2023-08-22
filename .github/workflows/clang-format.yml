@@ -1,20 +1,12 @@
-name: Clang-Format
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 1 * * *" # 3 AM CET
-  push:
-  pull_request:
 jobs:
   Clang-Format:
     uses: steinwurf/clang-format-action/.github/workflows/action.yml@4.0.0
-
-
-
-
-
-
-
-
-
-
+name: Clang-Format
+'on':
+  pull_request: null
+  push:
+    branches:
+    - master
+  schedule:
+  - cron: 0 1 * * *
+  workflow_dispatch: null
