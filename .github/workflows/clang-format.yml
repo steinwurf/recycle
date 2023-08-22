@@ -1,12 +1,14 @@
-jobs:
-  Clang-Format:
-    uses: steinwurf/clang-format-action/.github/workflows/action.yml@4.0.0
 name: Clang-Format
 'on':
-  pull_request: null
+  workflow_dispatch:
+    inputs:
+      extra_resolve_options:
+        description: Extra Resolve Options
+        required: false
   push:
     branches:
     - master
-  schedule:
-  - cron: 0 1 * * *
-  workflow_dispatch: null
+  pull_request:
+jobs:
+  Clang-Format:
+    uses: steinwurf/clang-format-action/.github/workflows/action.yml@4.0.0
