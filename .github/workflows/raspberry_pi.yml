@@ -1,3 +1,14 @@
+name: Raspberry Pi
+'on':
+  workflow_dispatch:
+    inputs:
+      extra_resolve_options:
+        description: Extra Resolve Options
+        required: false
+  push:
+    branches:
+    - master
+  pull_request:
 jobs:
   RaspberryPi:
     uses: steinwurf/cross-compile-action/.github/workflows/action.yml@6.0.0
@@ -9,16 +20,3 @@ jobs:
       test_binary_directory: build/cxx_raspberry_gxx83_armv7/test
       test_binary_name: recycle_tests
       test_runner: raspberry_pi
-name: Raspberry Pi
-'on':
-  pull_request: null
-  push:
-    branches:
-    - master
-  schedule:
-  - cron: 0 1 * * *
-  workflow_dispatch:
-    inputs:
-      extra_resolve_options:
-        description: Extra Resolve Options
-        required: false
