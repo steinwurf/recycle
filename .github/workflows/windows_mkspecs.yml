@@ -1,18 +1,16 @@
-jobs:
-  Windows-mkspecs:
-    uses: steinwurf/windows-mkspecs-action/.github/workflows/action.yml@6.0.0
-    with:
-      extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
 name: Windows C++ make-specs
 'on':
-  pull_request: null
-  push:
-    branches:
-    - master
-  schedule:
-  - cron: 0 1 * * *
   workflow_dispatch:
     inputs:
       extra_resolve_options:
         description: Extra Resolve Options
         required: false
+  push:
+    branches:
+    - master
+  pull_request:
+jobs:
+  Windows-mkspecs:
+    uses: steinwurf/windows-mkspecs-action/.github/workflows/action.yml@6.0.0
+    with:
+      extra_resolve_options: ${{ github.event.inputs.extra_resolve_options }}
