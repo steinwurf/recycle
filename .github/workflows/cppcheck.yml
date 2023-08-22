@@ -1,20 +1,12 @@
-name: Cppcheck
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: "0 1 * * *" # 3 AM CET
-  push:
 jobs:
   docker_check:
     name: Cppcheck
     uses: steinwurf/cppcheck-action/.github/workflows/action.yml@2.0.0
-
-
-
-
-
-
-
-
-
-
+name: Cppcheck
+'on':
+  push:
+    branches:
+    - master
+  schedule:
+  - cron: 0 1 * * *
+  workflow_dispatch: null
