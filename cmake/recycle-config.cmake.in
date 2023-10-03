@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+
+if(NOT TARGET steinwurf::recycle)
+  set_and_check(RECYCLE_INCLUDE_DIR "${PACKAGE_PREFIX_DIR}/@CMAKE_INSTALL_INCLUDEDIR@")
+  include("${CMAKE_CURRENT_LIST_DIR}/recycle-targets.cmake")
+endif()
