@@ -398,6 +398,30 @@ TEST(test_shared_pool, copy_recycle)
     EXPECT_EQ(dummy_two::m_count, 0);
 }
 
+TEST(test_shared_pool, pool_reserve_elements)
+{
+    {
+        recycle::shared_pool<dummy_one> pool;
+        pool.reserve(10);
+
+        EXPECT_EQ(pool.unused_resources(), 10);
+        EXPECT_EQ(dummy_one::m_count, 10);
+
+        {
+            auto d1 = pool.allocate();
+            EXPECT_EQ(pool.unused_resources(), 9);
+            EXPECT_EQ(dummy_one::m_count, 10);
+
+            auto d2 = pool.allocate();
+            auto d3 = pool.allocate();
+            EXPECT_EQ(pool.unused_resources(), 7);
+            EXPECT_EQ(dummy_one::m_count, 10);
+        }
+    }
+
+    EXPECT_EQ(dummy_one::m_count, 0);
+}
+
 /// Test that we are thread safe
 namespace
 {
