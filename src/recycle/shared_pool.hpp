@@ -69,8 +69,8 @@ public:
     /// It looks quite ugly and if somebody can fix in a simpler way
     /// please do :)
     template <class T = Value,
-              typename std::enable_if<std::is_default_constructible<T>::value,
-                                      uint8_t>::type = 0>
+              typename std::enable_if_t<std::is_default_constructible<T>::value,
+                                        bool> = true>
     shared_pool() :
         m_pool(std::make_shared<impl>(
             allocate_function(std::make_shared<value_type>)))
