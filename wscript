@@ -4,6 +4,8 @@
 APPNAME = "recycle"
 VERSION = "7.0.0"
 
+def options(ctx):
+    ctx.load("cmake")
 
 def configure(ctx):
 
