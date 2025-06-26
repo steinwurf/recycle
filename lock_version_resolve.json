@@ -1,0 +1,17 @@
+{
+    "gtest": {
+        "commit_id": "8e1f80ae8618fdba4389f1b56c811ea7241569d1",
+        "resolver_info": "6.0.2",
+        "sha1": "44c35f8798a738692c902fe2b67dc0cb76a1df53"
+    },
+    "gtest-source": {
+        "commit_id": "52eb8108c5bdec04579160ae17225d66034bd723",
+        "resolver_info": "v1.17.0",
+        "sha1": "8600eafa3daedc694d3115677da0dda3af6a8633"
+    },
+    "toolchains": {
+        "commit_id": "f7b9747ab22d7dbbeb23c9f863e735bac883566e",
+        "resolver_info": "1.0.3",
+        "sha1": "443cb23b0570dffd39283d8679ec393ed809302f"
+    }
+}

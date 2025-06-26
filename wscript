@@ -5,14 +5,18 @@ APPNAME = "recycle"
 VERSION = "7.0.0"
 
 
-def configure(conf):
-    conf.set_cxx_std(14)
+def configure(ctx):
+
+    ctx.load("cmake")
+
+    if ctx.is_toplevel():
+        ctx.cmake_configure()
 
 
-def build(bld):
-    bld(name="recycle_includes", includes="./src", export_includes="./src")
+def build(ctx):
 
-    if bld.is_toplevel():
-        # Only build test when executed from the top-level wscript,
-        # i.e. not when included as a dependency
-        bld.recurse("test")
+    ctx.load("cmake")
+
+    if ctx.is_toplevel():
+        ctx.cmake_build()
+
