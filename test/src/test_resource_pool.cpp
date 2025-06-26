@@ -86,6 +86,26 @@ struct dummy_three : std::enable_shared_from_this<dummy_three>
 };
 
 int32_t dummy_three::m_count = 0;
+
+// Thread safe dummy object
+struct dummy_four
+{
+    dummy_four(std::size_t)
+    {
+        ++m_count;
+    }
+
+    ~dummy_four()
+    {
+        --m_count;
+    }
+
+    // Counter which will check how many object have been allocate
+    // and deallocated
+    static std::atomic<int32_t> m_count;
+};
+
+std::atomic<int32_t> dummy_four::m_count = 0;
 }
 
 /// Test that our resource pool is a regular type. We are not
@@ -95,17 +115,15 @@ namespace
 /// This code checks whether a type is regular or not. See the
 /// Eric Niebler's talk from C++Now
 /// 2014. http://youtu.be/zgOF4NrQllo
-// clang-format off
 template <class T>
 struct is_regular
     : std::integral_constant<bool, std::is_default_constructible<T>::value &&
-      std::is_copy_constructible<T>::value &&
-      std::is_move_constructible<T>::value &&
-      std::is_copy_assignable<T>::value &&
-      std::is_move_assignable<T>::value>
+                                       std::is_copy_constructible<T>::value &&
+                                       std::is_move_constructible<T>::value &&
+                                       std::is_copy_assignable<T>::value &&
+                                       std::is_move_assignable<T>::value>
 {
 };
-// clang-format on
 }
 
 TEST(test_shared_pool, regular_type)
@@ -188,12 +206,8 @@ TEST(test_shared_pool, non_default_constructable)
     EXPECT_EQ(dummy_two::m_count, 0);
 
     {
-        // clang-format off
         auto make = []() -> std::shared_ptr<dummy_two>
-        {
-            return std::make_shared<dummy_two>(3U);
-        };
-        // clang-format on
+        { return std::make_shared<dummy_two>(3U); };
 
         recycle::shared_pool<dummy_two> pool(make);
 
@@ -252,7 +266,6 @@ TEST(test_shared_pool, recycle)
 {
     std::size_t recycled = 0;
 
-    // clang-format off
     auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
     {
         EXPECT_TRUE((bool)o);
@@ -260,10 +273,7 @@ TEST(test_shared_pool, recycle)
     };
 
     auto make = []() -> std::shared_ptr<dummy_two>
-    {
-        return std::make_shared<dummy_two>(3U);
-    };
-    // clang-format on
+    { return std::make_shared<dummy_two>(3U); };
 
     recycle::shared_pool<dummy_two> pool(make, recycle);
 
@@ -367,7 +377,6 @@ TEST(test_shared_pool, copy_recycle)
 {
     std::size_t recycled = 0;
 
-    // clang-format off
     auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
     {
         EXPECT_TRUE((bool)o);
@@ -375,10 +384,7 @@ TEST(test_shared_pool, copy_recycle)
     };
 
     auto make = []() -> std::shared_ptr<dummy_two>
-    {
-        return std::make_shared<dummy_two>(3U);
-    };
-    // clang-format on
+    { return std::make_shared<dummy_two>(3U); };
 
     recycle::shared_pool<dummy_two> pool(make, recycle);
     recycle::shared_pool<dummy_two> new_pool = pool;
@@ -410,29 +416,26 @@ struct lock_policy
 
 TEST(test_shared_pool, thread)
 {
-    std::size_t recycled = 0;
+    std::atomic<std::size_t> recycled = 0;
 
-    // clang-format off
-    auto recycle = [&recycled](std::shared_ptr<dummy_two> o)
+    using dummy_four = std::vector<int>;
+
+    auto recycle = [&recycled](std::shared_ptr<dummy_four> o)
     {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::shared_ptr<dummy_two>
-    {
-        return std::make_shared<dummy_two>(3U);
-    };
-    // clang-format on
+    auto make = []() -> std::shared_ptr<dummy_four>
+    { return std::make_shared<dummy_four>(3U); };
 
     // The pool we will use
-    using pool_type = recycle::shared_pool<dummy_two, lock_policy>;
+    using pool_type = recycle::shared_pool<dummy_four, lock_policy>;
 
     pool_type pool(make, recycle);
 
     // Lambda the threads will execute captures a reference to the pool
     // so they will all operate on the same pool concurrently
-    // clang-format off
     auto run = [&pool]()
     {
         {
@@ -453,7 +456,6 @@ TEST(test_shared_pool, thread)
 
         pool.free_unused();
     };
-    // clang-format on
 
     const std::size_t number_threads = 8;
     std::thread t[number_threads];

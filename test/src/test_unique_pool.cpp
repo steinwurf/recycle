@@ -86,6 +86,26 @@ struct dummy_three : std::enable_shared_from_this<dummy_three>
 };
 
 int32_t dummy_three::m_count = 0;
+
+// Thread safe dummy object
+struct dummy_four
+{
+    dummy_four(std::size_t)
+    {
+        ++m_count;
+    }
+
+    ~dummy_four()
+    {
+        --m_count;
+    }
+
+    // Counter which will check how many object have been allocate
+    // and deallocated
+    static std::atomic<int32_t> m_count;
+};
+
+std::atomic<int32_t> dummy_four::m_count = 0;
 }
 
 /// Test that our resource pool is a regular type. We are not
@@ -396,19 +416,19 @@ struct lock_policy
 
 TEST(test_unique_pool, thread)
 {
-    std::size_t recycled = 0;
+    std::atomic<std::size_t> recycled = 0;
 
-    auto recycle = [&recycled](std::unique_ptr<dummy_two>& o)
+    auto recycle = [&recycled](std::unique_ptr<dummy_four>& o)
     {
         EXPECT_TRUE((bool)o);
         ++recycled;
     };
 
-    auto make = []() -> std::unique_ptr<dummy_two>
-    { return std::make_unique<dummy_two>(3U); };
+    auto make = []() -> std::unique_ptr<dummy_four>
+    { return std::make_unique<dummy_four>(3U); };
 
     // The pool we will use
-    using pool_type = recycle::unique_pool<dummy_two, lock_policy>;
+    using pool_type = recycle::unique_pool<dummy_four, lock_policy>;
 
     pool_type pool(make, recycle);
 

@@ -1,21 +1,22 @@
 [
     {
-        "name": "waf-tools",
-        "resolver": "git",
-        "method": "semver",
-        "major": 5,
-        "sources": [
-            "github.com/steinwurf/waf-tools.git"
-        ]
-    },
-    {
         "name": "gtest",
         "internal": true,
         "resolver": "git",
         "method": "semver",
-        "major": 5,
+        "major": 6,
         "sources": [
             "github.com/steinwurf/gtest.git"
         ]
-    }
+    },
+    {
+    "name": "toolchains",
+    "internal": true,
+    "resolver": "git",
+    "method": "semver",
+    "major": 1,
+    "sources": [
+      "github.com/steinwurf/cmake-toolchains.git"
+    ]
+  }
 ]
