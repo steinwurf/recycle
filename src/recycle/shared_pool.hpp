@@ -24,7 +24,11 @@ namespace recycle
 /// expensive to create objects where you would like to create a
 /// factory capable of recycling the objects.
 ///
-///
+/// Note, when using the shared pool in a multithreaded environment
+/// you should use a locking policy and make sure that the objects
+/// you allocate are thread safe. The default locking policy
+/// is no_locking_policy which means that the pool is not thread
+/// safe.
 template <class Value, class LockingPolicy = no_locking_policy>
 class shared_pool
 {
@@ -87,7 +91,8 @@ public:
     /// Create a shared pool using a specific allocate function and
     /// recycle function.
     /// @param allocate Allocation function
-    /// @param recycle Recycle function
+    /// @param recycle Recycle function. If used in a threaded environment
+    ///        the recycle function should be thread safe.
     shared_pool(allocate_function allocate, recycle_function recycle) :
         m_pool(std::make_shared<impl>(std::move(allocate), std::move(recycle)))
     {
