@@ -8,9 +8,11 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <forward_list>
 #include <functional>
 #include <list>
 #include <memory>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -73,8 +75,8 @@ public:
     /// It looks quite ugly and if somebody can fix in a simpler way
     /// please do :)
     template <class T = Value,
-              typename std::enable_if<std::is_default_constructible<T>::value,
-                                      uint8_t>::type = 0>
+              typename std::enable_if_t<std::is_default_constructible<T>::value,
+                                        bool> = true>
     shared_pool() :
         m_pool(std::make_shared<impl>(
             allocate_function(std::make_shared<value_type>)))
@@ -146,6 +148,16 @@ public:
         return m_pool->allocate();
     }
 
+    constexpr std::size_t capacity () noexcept
+    {
+        return m_pool->capacity();
+    }
+
+    constexpr void reserve (std::size_t new_cap)
+    {
+        m_pool->reserve(new_cap);
+    }
+
 private:
     /// The actual pool implementation. We use the
     /// enable_shared_from_this helper to make sure we can pass a
@@ -155,7 +167,8 @@ private:
     struct impl : public std::enable_shared_from_this<impl>
     {
         /// @copydoc shared_pool::shared_pool(allocate_function)
-        impl(allocate_function allocate) : m_allocate(std::move(allocate))
+        impl(allocate_function allocate) :
+            m_allocate(std::move(allocate)), m_size(0), m_max_capacity(0)
         {
             assert(m_allocate);
         }
@@ -163,7 +176,8 @@ private:
         /// @copydoc shared_pool::shared_pool(allocate_function,
         ///                                       recycle_function)
         impl(allocate_function allocate, recycle_function recycle) :
-            m_allocate(std::move(allocate)), m_recycle(std::move(recycle))
+            m_allocate(std::move(allocate)), m_recycle(std::move(recycle)),
+            m_size(0), m_max_capacity(0)
         {
             assert(m_allocate);
             assert(m_recycle);
@@ -172,7 +186,8 @@ private:
         /// Copy constructor
         impl(const impl& other) :
             std::enable_shared_from_this<impl>(other),
-            m_allocate(other.m_allocate), m_recycle(other.m_recycle)
+            m_allocate(other.m_allocate), m_recycle(other.m_recycle),
+            m_size(0), m_max_capacity(0)
         {
             std::size_t size = other.unused_resources();
             for (std::size_t i = 0; i < size; ++i)
@@ -225,6 +240,9 @@ private:
             if (!resource)
             {
                 assert(m_allocate);
+                if (m_max_capacity && m_size > m_max_capacity - 1)
+                    throw std::length_error("over the max capacity");
+
                 resource = m_allocate();
             }
 
@@ -244,6 +262,7 @@ private:
             //   2. A std::shared_ptr<T> that points to the actual
             //      resource and is the one actually keeping it alive.
 
+            m_size++;
             return value_ptr(resource.get(), deleter(pool, resource));
         }
 
@@ -272,6 +291,34 @@ private:
 
             lock_type lock(m_mutex);
             m_free_list.push_back(resource);
+            m_size--;
+        }
+
+        constexpr std::size_t capacity () noexcept
+        {
+            lock_type lock(m_mutex);
+            return m_max_capacity;
+        }
+
+        constexpr void reserve (std::size_t new_cap)
+        {
+            std::forward_list<value_ptr> pending_resources;
+            {
+                lock_type lock(m_mutex);
+                if  (new_cap <= m_max_capacity)
+                    return;
+
+                auto diff = new_cap - m_size;
+                for (auto i = 0; i < diff; i++) {
+                    value_ptr resource = m_allocate();
+                    auto pool = impl::shared_from_this();
+
+                    pending_resources.emplace_front(resource.get(), deleter(pool, resource));
+                }
+
+                m_max_capacity = new_cap;
+            }
+            pending_resources.clear();
         }
 
     private:
@@ -284,6 +331,8 @@ private:
         /// Stores all the free resources
         std::list<value_ptr> m_free_list;
 
+        std::size_t m_max_capacity;
+        std::size_t m_size;
         /// Mutex used to coordinate access to the pool. We had to
         /// make it mutable as we have to lock in the
         /// unused_resources() function. Otherwise we can have a
